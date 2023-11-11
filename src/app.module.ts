@@ -7,6 +7,8 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { User } from "./user/entities/user.entity";
 import { ProviderModule } from './provider/provider.module';
 import { Provider } from "./provider/entities/provider.entity";
+import { WatchableModule } from './movie/watchable.module';
+import { Watchable } from "./movie/entities/watchable.entity";
 
 @Module({
   imports: [
@@ -20,11 +22,12 @@ import { Provider } from "./provider/entities/provider.entity";
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [User, Provider],
-      synchronize: true,
+      entities: [User, Provider, Watchable],
+      synchronize: false,
     }),
     UserModule,
-    ProviderModule
+    ProviderModule,
+    WatchableModule
   ],
   controllers: [AppController],
   providers: [AppService],

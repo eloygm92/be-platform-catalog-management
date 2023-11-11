@@ -1,4 +1,13 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn
+} from "typeorm";
+import { Watchable } from "../../movie/entities/watchable.entity";
 
 @Entity()
 export class Provider {
@@ -25,4 +34,8 @@ export class Provider {
 
   @Column({ type: 'timestamp', name: 'deleted_at', nullable: true })
   deleted_at: Date;
+
+  @ManyToMany(() => Watchable, (watchable) => watchable.provider)
+  @JoinTable({ name: 'provider_movie', joinColumn: { name: 'provider_id', referencedColumnName: 'id'}, inverseJoinColumn: { name: 'watchable_id', referencedColumnName: 'id' } })
+  watchables: Watchable[];
 }
