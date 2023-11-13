@@ -5,9 +5,9 @@ import {
   JoinTable,
   ManyToMany,
   PrimaryGeneratedColumn,
-  UpdateDateColumn
-} from "typeorm";
-import { Watchable } from "../../movie/entities/watchable.entity";
+  UpdateDateColumn,
+} from 'typeorm';
+import { Watchable } from '../../movie/entities/watchable.entity';
 
 @Entity()
 export class Provider {
@@ -26,16 +26,29 @@ export class Provider {
   @Column({ length: 50 })
   logo_path: string;
 
-  @CreateDateColumn({ type: 'timestamp', name: 'created_at', default: () => 'CURRENT_TIMESTAMP(6)' })
+  @CreateDateColumn({
+    type: 'timestamp',
+    name: 'created_at',
+    default: () => 'CURRENT_TIMESTAMP(6)',
+  })
   created_at: Date;
 
-  @UpdateDateColumn({ type: 'timestamp', name: 'updated_at', default: () => 'CURRENT_TIMESTAMP(6)', onUpdate: 'CURRENT_TIMESTAMP(6)' })
+  @UpdateDateColumn({
+    type: 'timestamp',
+    name: 'updated_at',
+    default: () => 'CURRENT_TIMESTAMP(6)',
+    onUpdate: 'CURRENT_TIMESTAMP(6)',
+  })
   updated_at: Date;
 
   @Column({ type: 'timestamp', name: 'deleted_at', nullable: true })
   deleted_at: Date;
 
   @ManyToMany(() => Watchable, (watchable) => watchable.provider)
-  @JoinTable({ name: 'provider_movie', joinColumn: { name: 'provider_id', referencedColumnName: 'id'}, inverseJoinColumn: { name: 'watchable_id', referencedColumnName: 'id' } })
+  @JoinTable({
+    name: 'provider_watchable',
+    joinColumn: { name: 'provider_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'watchable_id', referencedColumnName: 'id' },
+  })
   watchables: Watchable[];
 }

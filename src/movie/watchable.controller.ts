@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { WatchableService } from './watchable.service';
 import { CreateWatchableDto } from './dto/create-watchable.dto';
 import { UpdateWatchableDto } from './dto/update-watchable.dto';

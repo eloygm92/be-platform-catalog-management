@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { CreateWatchableDto } from './dto/create-watchable.dto';
 import { UpdateWatchableDto } from './dto/update-watchable.dto';
-import { Watchable } from "./entities/watchable.entity";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
-import { Provider } from "../provider/entities/provider.entity";
+import { Watchable } from './entities/watchable.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Provider } from '../provider/entities/provider.entity';
 
 @Injectable()
 export class WatchableService {
@@ -19,18 +19,18 @@ export class WatchableService {
     const watchable = this.watchableRepository.create(createWatchableDataDto);
     await this.watchableRepository.save(watchable);
 
-    if(!providers) return watchable;
+    if (!providers) return watchable;
     try {
       return await this.saveProviders(watchable, providers);
-    } catch(e) {
+    } catch (e) {
       await this.watchableRepository.delete(watchable.id);
       return e;
     }
   }
 
   async findAll(type = null) {
-    if(type)
-      return await this.watchableRepository.find({ where: { type: type }});
+    if (type)
+      return await this.watchableRepository.find({ where: { type: type } });
     return await this.watchableRepository.find();
   }
 
@@ -40,30 +40,38 @@ export class WatchableService {
 
   async update(id: number, updateWatchableDto: UpdateWatchableDto) {
     const { providers, ...updateWatchableDataDto } = updateWatchableDto;
-    const updated = await this.watchableRepository.update(id, updateWatchableDataDto);
-    if(!providers)
-      return updated.affected === 1 ? this.findOne(id) : false;
+    const updated = await this.watchableRepository.update(
+      id,
+      updateWatchableDataDto,
+    );
+    if (!providers) return updated.affected === 1 ? this.findOne(id) : false;
 
-    try{
+    try {
       const updatedWatchable = await this.findOne(id);
       return await this.saveProviders(updatedWatchable, providers);
-    } catch(e) {
+    } catch (e) {
       return e;
     }
-
   }
 
   async remove(id: number) {
     const providersAux = await this.providerRepository.find({
-      relations: ["watchables"],
-      where: { watchables: { id } }
+      relations: ['watchables'],
+      where: { watchables: { id } },
     });
-    const providersData = await this.getProvidersWithWatchable(providersAux.reduce((acc, provider) => {
-      acc.push(provider.id);
-      return acc;
-    },[]));
+    const providersData = await this.getProvidersWithWatchable(
+      providersAux.reduce((acc, provider) => {
+        acc.push(provider.id);
+        return acc;
+      }, []),
+    );
 
-    providersData.forEach(provider => provider.watchables = provider.watchables.filter(watchable => watchable.id !== id));
+    providersData.forEach(
+      (provider) =>
+        (provider.watchables = provider.watchables.filter(
+          (watchable) => watchable.id !== id,
+        )),
+    );
 
     await this.providerRepository.save(providersData);
     const removed = await this.watchableRepository.delete(id);
@@ -71,11 +79,11 @@ export class WatchableService {
   }
 
   private async saveProviders(watchable: Watchable, providers: number[]) {
-    const providersWithWatchables = await this.getProvidersWithWatchable(providers);
+    const providersWithWatchables =
+      await this.getProvidersWithWatchable(providers);
 
-    for await(const provider of providersWithWatchables) {
-      if(!provider.watchables)
-        provider.watchables = [watchable];
+    for await (const provider of providersWithWatchables) {
+      if (!provider.watchables) provider.watchables = [watchable];
       else {
         const setData = new Set(provider.watchables);
         setData.add(watchable);
@@ -83,14 +91,14 @@ export class WatchableService {
       }
     }
 
-    return await this.providerRepository.save(providersWithWatchables)
+    return await this.providerRepository.save(providersWithWatchables);
   }
 
   private async getProvidersWithWatchable(providers: number[]) {
     return await this.providerRepository
       .createQueryBuilder('Provider')
-      .where("Provider.id IN (:ids)", { ids: providers })
-      .leftJoinAndSelect("Provider.watchables", "watchables")
+      .where('Provider.id IN (:ids)', { ids: providers })
+      .leftJoinAndSelect('Provider.watchables', 'watchables')
       .getMany();
   }
 }

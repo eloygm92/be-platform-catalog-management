@@ -3,10 +3,12 @@ import {
   CreateDateColumn,
   Entity,
   ManyToMany,
+  OneToMany,
   PrimaryGeneratedColumn,
-  UpdateDateColumn
-} from "typeorm";
-import { Provider } from "../../provider/entities/provider.entity";
+  UpdateDateColumn,
+} from 'typeorm';
+import { Provider } from '../../provider/entities/provider.entity';
+import { Season } from '../../season/entities/season.entity';
 
 @Entity()
 export class Watchable {
@@ -34,12 +36,24 @@ export class Watchable {
   @Column({ type: 'enum', enum: ['movie', 'serie'] })
   type: string;
 
-  @CreateDateColumn({ type: 'timestamp', name: 'created_at', default: () => 'CURRENT_TIMESTAMP(6)' })
+  @CreateDateColumn({
+    type: 'timestamp',
+    name: 'created_at',
+    default: () => 'CURRENT_TIMESTAMP(6)',
+  })
   created_at: Date;
 
-  @UpdateDateColumn({ type: 'timestamp', name: 'updated_at', default: () => 'CURRENT_TIMESTAMP(6)', onUpdate: 'CURRENT_TIMESTAMP(6)' })
+  @UpdateDateColumn({
+    type: 'timestamp',
+    name: 'updated_at',
+    default: () => 'CURRENT_TIMESTAMP(6)',
+    onUpdate: 'CURRENT_TIMESTAMP(6)',
+  })
   updated_at: Date;
 
   @ManyToMany(() => Provider, (provider) => provider.watchables)
   provider: Provider[];
+
+  @OneToMany(() => Season, (season) => season.watchable, { cascade: true })
+  seasons: Season[];
 }

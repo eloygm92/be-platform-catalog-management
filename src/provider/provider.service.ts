@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { CreateProviderDto } from './dto/create-provider.dto';
 import { UpdateProviderDto } from './dto/update-provider.dto';
-import { Provider } from "./entities/provider.entity";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { Provider } from './entities/provider.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class ProviderService {
@@ -31,7 +31,9 @@ export class ProviderService {
   }
 
   async remove(id: number) {
-    const removed = await this.providerRepository.update(id, { deleted_at: new Date() });
+    const removed = await this.providerRepository.update(id, {
+      deleted_at: new Date(),
+    });
     return removed.affected === 1;
   }
 }

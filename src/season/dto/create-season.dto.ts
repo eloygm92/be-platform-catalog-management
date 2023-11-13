@@ -1,21 +1,25 @@
 import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class CreateWatchableDto {
+export class CreateSeasonDto {
   @IsOptional()
   @IsNumber()
   id?: number;
 
   @IsNotEmpty()
-  @IsString()
-  name: string;
+  @IsNumber()
+  season_number: number;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  original_name: string;
+  overview: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  external_id: number;
+  air_date: Date;
+
+  @IsOptional()
+  @IsString()
+  poster_path: string;
 
   @IsOptional()
   @IsNumber()
@@ -25,10 +29,7 @@ export class CreateWatchableDto {
   @IsNumber()
   vote_count: number;
 
-  @IsNotEmpty()
-  @IsString()
-  overview: string;
-
   @IsOptional()
-  providers: number[];
+  @IsNumber()
+  watchable: number;
 }
