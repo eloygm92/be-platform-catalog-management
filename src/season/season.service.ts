@@ -16,9 +16,11 @@ export class SeasonService {
   ) {}
   async create(createSeasonDto: CreateSeasonDto) {
     const { watchable, ...createSeasonDataDto } = createSeasonDto;
-    createSeasonDataDto['watchable'] = await this.watchableRepository.findOneBy({
-      id: watchable,
-    });
+    createSeasonDataDto['watchable'] = await this.watchableRepository.findOneBy(
+      {
+        id: watchable,
+      },
+    );
 
     const season = this.seasonRepository.create(createSeasonDataDto);
     await this.seasonRepository.save(season);
@@ -38,9 +40,10 @@ export class SeasonService {
     const { watchable, ...updateSeasonDataDto } = updateSeasonDto;
 
     if (watchable) {
-      updateSeasonDataDto['watchable'] = await this.watchableRepository.findOneBy({
-        id: watchable,
-      });
+      updateSeasonDataDto['watchable'] =
+        await this.watchableRepository.findOneBy({
+          id: watchable,
+        });
     }
 
     const updated = await this.seasonRepository.update(id, updateSeasonDataDto);

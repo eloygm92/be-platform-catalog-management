@@ -4,33 +4,28 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Watchable } from '../../movie/entities/watchable.entity';
-import { Episode } from '../../episode/entities/episode.entity';
+import { Season } from '../../season/entities/season.entity';
 
 @Entity()
-export class Season {
+export class Episode {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Watchable, (watchable) => watchable.seasons)
-  @JoinColumn({ name: 'watchable_id' })
-  watchable: Watchable;
+  @ManyToOne(() => Season, (season) => season.episodes)
+  @JoinColumn({ name: 'season_id' })
+  season: number;
 
-  @Column({ type: 'int', nullable: false })
-  season_number: number;
+  @Column({ type: 'varchar', length: 100, nullable: false })
+  name: string;
+
+  @Column({ type: 'int', nullable: true, name: 'number' })
+  episode_number: number;
 
   @Column({ type: 'text', nullable: true })
   overview: string;
-
-  @Column({ type: 'date', nullable: true })
-  air_date: Date;
-
-  @Column({ type: 'varchar', length: 50, nullable: true })
-  poster_path: string;
 
   @Column({ type: 'int', nullable: true })
   vote_average: number;
@@ -52,7 +47,4 @@ export class Season {
     onUpdate: 'CURRENT_TIMESTAMP(6)',
   })
   updated_at: Date;
-
-  @OneToMany(() => Episode, (episode) => episode.season, { cascade: true })
-  episodes: Episode[];
 }
