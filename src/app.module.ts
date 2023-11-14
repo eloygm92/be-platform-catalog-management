@@ -13,6 +13,8 @@ import { SeasonModule } from './season/season.module';
 import { Season } from './season/entities/season.entity';
 import { EpisodeModule } from './episode/episode.module';
 import { Episode } from './episode/entities/episode.entity';
+import { WatchlistModule } from './watchlist/watchlist.module';
+import { Watchlist } from './watchlist/entities/watchlist.entity';
 
 @Module({
   imports: [
@@ -26,7 +28,7 @@ import { Episode } from './episode/entities/episode.entity';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [User, Provider, Watchable, Season, Episode],
+      entities: [User, Provider, Watchable, Season, Episode, Watchlist],
       synchronize: false,
       logging: true,
     }),
@@ -35,6 +37,7 @@ import { Episode } from './episode/entities/episode.entity';
     WatchableModule,
     SeasonModule,
     EpisodeModule,
+    WatchlistModule,
   ],
   controllers: [AppController],
   providers: [AppService],

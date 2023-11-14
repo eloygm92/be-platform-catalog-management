@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { Provider } from '../../provider/entities/provider.entity';
 import { Season } from '../../season/entities/season.entity';
+import { Watchlist } from '../../watchlist/entities/watchlist.entity';
 
 @Entity()
 export class Watchable {
@@ -56,4 +57,9 @@ export class Watchable {
 
   @OneToMany(() => Season, (season) => season.watchable, { cascade: true })
   seasons: Season[];
+
+  @OneToMany(() => Watchlist, (watchlist) => watchlist.watchable, {
+    cascade: true,
+  })
+  watchlists: Watchlist[];
 }

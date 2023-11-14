@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Watchlist } from '../../watchlist/entities/watchlist.entity';
 
 @Entity()
 export class User {
@@ -16,4 +17,7 @@ export class User {
 
   @Column()
   deactivate_at: Date;
+
+  @OneToMany(() => Watchlist, (watchlist) => watchlist.user)
+  watchlists: Watchlist[];
 }
