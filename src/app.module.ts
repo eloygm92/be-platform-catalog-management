@@ -15,6 +15,7 @@ import { EpisodeModule } from './episode/episode.module';
 import { Episode } from './episode/entities/episode.entity';
 import { WatchlistModule } from './watchlist/watchlist.module';
 import { Watchlist } from './watchlist/entities/watchlist.entity';
+import { ExtractorModule } from './extractor/extractor.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { Watchlist } from './watchlist/entities/watchlist.entity';
     SeasonModule,
     EpisodeModule,
     WatchlistModule,
+    ExtractorModule,
   ],
   controllers: [AppController],
   providers: [AppService],

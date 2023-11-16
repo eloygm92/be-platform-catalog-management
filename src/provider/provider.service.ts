@@ -17,6 +17,15 @@ export class ProviderService {
     return await this.providerRepository.save(provider);
   }
 
+  async massiveCreate(createProviderDto: CreateProviderDto[]) {
+    const createdProviders = createProviderDto.reduce((acc, providerDto) => {
+      const provider = this.providerRepository.create(providerDto);
+      acc.push(provider);
+      return acc;
+    }, []);
+    await this.providerRepository.save(createdProviders);
+    return createdProviders;
+  }
   async findAll() {
     return await this.providerRepository.find();
   }
