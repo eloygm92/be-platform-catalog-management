@@ -29,6 +29,12 @@ export class WatchableController {
   findMovies() {
     return this.watchableService.findAll('movie');
   }
+
+  @Get('series')
+  findSeries() {
+    return this.watchableService.findAll('tv');
+  }
+
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.watchableService.findOne(+id);

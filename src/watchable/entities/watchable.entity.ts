@@ -2,40 +2,53 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  ManyToMany,
+  ManyToMany, ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+  UpdateDateColumn
+} from "typeorm";
 import { Provider } from '../../provider/entities/provider.entity';
 import { Season } from '../../season/entities/season.entity';
 import { Watchlist } from '../../watchlist/entities/watchlist.entity';
+import { Genre } from "./genre.entity";
 
 @Entity()
 export class Watchable {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ length: 100 })
+  @Column({ type: "varchar", length: 200, nullable: true })
   name: string;
 
-  @Column({ length: 100 })
+  @Column({ type: "varchar", length: 250, nullable: true })
   original_name: string;
 
   @Column()
   external_id: number;
 
-  @Column()
+  @Column({ type: "text" })
   overview: string;
 
-  @Column()
+  @Column({ type: 'float', nullable: true })
   vote_average: number;
 
-  @Column()
+  @Column({ type: 'float', nullable: true})
   vote_count: number;
 
-  @Column({ type: 'enum', enum: ['movie', 'serie'] })
+  @Column({ type: 'float', nullable: true})
+  popularity: number;
+
+  @Column({ type: 'enum', enum: ['movie', 'tv'] })
   type: string;
+
+  @Column({ type: 'date', nullable: true })
+  release_date: Date;
+
+  @Column({ type: 'varchar', length: 150, nullable: true })
+  poster_path: string;
+
+  @ManyToMany(() => Genre, (genre) => genre.watchables)
+  genres: Genre[];
 
   @CreateDateColumn({
     type: 'timestamp',
