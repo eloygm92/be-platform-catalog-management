@@ -16,7 +16,7 @@ export class ExtractorController {
     return this.extractorService.getProviders();
   }
 
-  @Get(':id')
+  /*@Get(':id')
   findOne(@Param('id') id: string) {
     return this.extractorService.findOne(+id);
   }
@@ -29,5 +29,5 @@ export class ExtractorController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.extractorService.remove(+id);
-  }
+  }*/
 }
