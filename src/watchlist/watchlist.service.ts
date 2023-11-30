@@ -4,7 +4,7 @@ import { UpdateWatchlistDto } from './dto/update-watchlist.dto';
 import { Watchlist } from './entities/watchlist.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Watchable } from '../movie/entities/watchable.entity';
+import { Watchable } from '../watchable/entities/watchable.entity';
 import { User } from '../user/entities/user.entity';
 
 @Injectable()

@@ -7,8 +7,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './user/entities/user.entity';
 import { ProviderModule } from './provider/provider.module';
 import { Provider } from './provider/entities/provider.entity';
-import { WatchableModule } from './movie/watchable.module';
-import { Watchable } from './movie/entities/watchable.entity';
+import { WatchableModule } from './watchable/watchable.module';
+import { Watchable } from './watchable/entities/watchable.entity';
 import { SeasonModule } from './season/season.module';
 import { Season } from './season/entities/season.entity';
 import { EpisodeModule } from './episode/episode.module';
@@ -16,6 +16,8 @@ import { Episode } from './episode/entities/episode.entity';
 import { WatchlistModule } from './watchlist/watchlist.module';
 import { Watchlist } from './watchlist/entities/watchlist.entity';
 import { ExtractorModule } from './extractor/extractor.module';
+import { ScheduleModule } from "@nestjs/schedule";
+import { Genre } from "./watchable/entities/genre.entity";
 
 @Module({
   imports: [
@@ -29,10 +31,14 @@ import { ExtractorModule } from './extractor/extractor.module';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [User, Provider, Watchable, Season, Episode, Watchlist],
+      entities: [User, Provider, Watchable, Season, Episode, Watchlist, Genre],
       synchronize: false,
       logging: true,
+      retryAttempts: 5,
+      poolSize: 50,
     }),
+    TypeOrmModule.forFeature([User, Provider, Watchable, Season, Episode, Watchlist, Genre]),
+    ScheduleModule.forRoot(),
     UserModule,
     ProviderModule,
     WatchableModule,

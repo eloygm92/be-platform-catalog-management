@@ -9,4 +9,13 @@ export class AppController {
   getHello(): string {
     return this.appService.getHello();
   }
+  @Get('SynchroMovie')
+  getSyncroMovie(): Promise<any> {
+    return this.appService.handleTaskWatchableMovie();
+  }
+
+  @Get('SynchroTv')
+  getSyncroTv(): Promise<any> {
+    return this.appService.handleTaskWatchableTv();
+  }
 }

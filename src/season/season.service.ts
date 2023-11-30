@@ -4,7 +4,7 @@ import { UpdateSeasonDto } from './dto/update-season.dto';
 import { Season } from './entities/season.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Watchable } from '../movie/entities/watchable.entity';
+import { Watchable } from '../watchable/entities/watchable.entity';
 
 @Injectable()
 export class SeasonService {

@@ -61,7 +61,8 @@ export class ExtractorService {
     }
     return { "msg": constants.EMPTY_MESSAGE + constants.PROVIDERS };
   }
-  create(createExtractorDto: CreateExtractorDto) {
+
+  /*create(createExtractorDto: CreateExtractorDto) {
     return 'This action adds a new extractor';
   }
 
@@ -79,5 +80,5 @@ export class ExtractorService {
 
   remove(id: number) {
     return `This action removes a #${id} extractor`;
-  }
+  }*/
 }

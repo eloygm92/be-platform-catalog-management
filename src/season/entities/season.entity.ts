@@ -8,7 +8,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Watchable } from '../../movie/entities/watchable.entity';
+import { Watchable } from '../../watchable/entities/watchable.entity';
 import { Episode } from '../../episode/entities/episode.entity';
 
 @Entity()
@@ -19,6 +19,15 @@ export class Season {
   @ManyToOne(() => Watchable, (watchable) => watchable.seasons)
   @JoinColumn({ name: 'watchable_id' })
   watchable: Watchable;
+
+  @Column({ type: 'varchar', length: 200, nullable: false })
+  name: string;
+
+  @Column({ type: 'int', nullable: false })
+  external_id: number;
+
+  @Column({ type: 'int', nullable: false })
+  episode_count: number;
 
   @Column({ type: 'int', nullable: false })
   season_number: number;

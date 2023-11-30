@@ -3,7 +3,7 @@ import { WatchlistService } from './watchlist.service';
 import { WatchlistController } from './watchlist.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Watchlist } from './entities/watchlist.entity';
-import { Watchable } from '../movie/entities/watchable.entity';
+import { Watchable } from '../watchable/entities/watchable.entity';
 import { User } from '../user/entities/user.entity';
 
 @Module({

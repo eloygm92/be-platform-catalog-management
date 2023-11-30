@@ -5,7 +5,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Watchable } from '../../movie/entities/watchable.entity';
+import { Watchable } from '../../watchable/entities/watchable.entity';
 import { User } from '../../user/entities/user.entity';
 
 @Entity()

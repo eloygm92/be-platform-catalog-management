@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Watchable } from '../../movie/entities/watchable.entity';
+import { Watchable } from '../../watchable/entities/watchable.entity';
 
 @Entity()
 export class Provider {
