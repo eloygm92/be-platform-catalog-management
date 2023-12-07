@@ -3,6 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { IsNull, Repository } from "typeorm";
 import { Watchable } from "./watchable/entities/watchable.entity";
 import { Genre } from "./watchable/entities/genre.entity";
+import { Interval } from "@nestjs/schedule";
 
 @Injectable()
 export class AppService {
@@ -11,16 +12,18 @@ export class AppService {
     private readonly watchableRepository: Repository<Watchable>,
     @InjectRepository(Genre)
     private readonly genreRepository: Repository<Genre>,
-  ) {}
-
-  private API_OPTIONS = {
-    method: 'GET',
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI4MDc5YTcxMjlkOWZiZDU0YTliMmIxYzE1OGUwMzc2OSIsInN1YiI6IjY1MzE0ZWM5YzQzOWMwMDBjNDcwM2EzZiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.VwRoidWfUp94etu-vW1YMaQpxCpdlO4UWIqTwSx74UQ`
+  ) {
+  this.API_OPTIONS = {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.API_TOKEN}`
+      }
     }
   }
+  private API_OPTIONS: object;
+
   getHello(): string {
     return 'Hello World!';
   }
@@ -56,7 +59,7 @@ export class AppService {
     return watchablesToFetch;
   }
 
-  //@Interval(5000)
+  //@Interval(6000)
   async handleTaskWatchableTv() {
     const watchablesToFetch = await this.watchableRepository.find({ relations: ['seasons'], where: { type: 'tv', popularity: IsNull() }, order: { id: 'ASC' }, take: 50 });
     if(watchablesToFetch) {

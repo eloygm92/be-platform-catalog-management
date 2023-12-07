@@ -10,6 +10,9 @@ import {
 import { WatchableService } from './watchable.service';
 import { CreateWatchableDto } from './dto/create-watchable.dto';
 import { UpdateWatchableDto } from './dto/update-watchable.dto';
+import { Pagination, PaginationParams } from "../helpers/decorators/params-params.decorator";
+import { Sorting, SortingParams } from "../helpers/decorators/sorting-params.decorator";
+import { Filtering, FilteringParams } from "../helpers/decorators/filtering-params.decorator";
 
 @Controller('watchable')
 export class WatchableController {
@@ -21,18 +24,38 @@ export class WatchableController {
   }
 
   @Get()
-  findAll() {
-    return this.watchableService.findAll();
+  findAll(
+    @PaginationParams() paginationParams: Pagination,
+    @SortingParams(['id', 'type', 'name', 'external_id', 'release_date', 'popularity', 'vote_average', 'genre']) sort?: Sorting,
+    @FilteringParams(['id', 'type', 'name', 'external_id', 'release_date', 'popularity', 'vote_average', 'genre']) filter?: Filtering[],
+  ) {
+    return this.watchableService.findAll(paginationParams, sort, filter);
   }
 
   @Get('movies')
-  findMovies() {
-    return this.watchableService.findAll('movie');
+  findMovies(
+    @PaginationParams() paginationParams: Pagination,
+    @SortingParams(['id', 'type', 'name', 'external_id', 'release_date', 'popularity', 'vote_average', 'genre']) sort?: Sorting,
+    @FilteringParams(['id', 'type', 'name', 'external_id', 'release_date', 'popularity', 'vote_average', 'genre']) filter?: Filtering[],
+  ) {
+    if (!filter) {
+      filter = [{ property: 'type', rule: 'eq', value: 'movie' } as Filtering];
+    }
+
+    return this.watchableService.findAll(paginationParams, sort, filter);
   }
 
   @Get('series')
-  findSeries() {
-    return this.watchableService.findAll('tv');
+  findSeries(
+    @PaginationParams() paginationParams: Pagination,
+    @SortingParams(['id', 'type', 'name', 'external_id', 'release_date', 'popularity', 'vote_average', 'genre']) sort?: Sorting,
+    @FilteringParams(['id', 'type', 'name', 'external_id', 'release_date', 'popularity', 'vote_average', 'genre']) filter?: Filtering[],
+  ) {
+    if (!filter) {
+      filter = [{ property: 'type', rule: 'eq', value: 'tv' } as Filtering];
+    }
+
+    return this.watchableService.findAll(paginationParams, sort, filter);
   }
 
   @Get(':id')

@@ -5,6 +5,11 @@ import { Watchable } from './entities/watchable.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Provider } from '../provider/entities/provider.entity';
+import { Filtering } from "../helpers/decorators/filtering-params.decorator";
+import { Pagination } from "../helpers/decorators/params-params.decorator";
+import { Sorting } from "../helpers/decorators/sorting-params.decorator";
+import { getOrder, getWhere } from "../helpers/typeOrm.helper";
+import { PaginatedResource } from "../helpers/paginatedResource.type";
 
 @Injectable()
 export class WatchableService {
@@ -28,10 +33,27 @@ export class WatchableService {
     }
   }
 
-  async findAll(type = null) {
-    if (type)
-      return await this.watchableRepository.find({ where: { type: type } });
-    return await this.watchableRepository.find();
+  async findAll(
+    { page, limit, size, offset }: Pagination,
+    sort?: Sorting,
+    filter?: Filtering[],
+  ): Promise<PaginatedResource<Partial<Watchable>>> {
+    const where = getWhere(filter);
+    const order = getOrder(sort);
+
+    const [watchables, total] = await this.watchableRepository.findAndCount({
+      where,
+      order,
+      take: limit,
+      skip: offset,
+    });
+
+    return {
+      totalItems: total,
+      items: watchables,
+      page,
+      size
+    };
   }
 
   async findOne(id: number) {
