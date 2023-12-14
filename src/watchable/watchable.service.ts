@@ -42,22 +42,32 @@ export class WatchableService {
     const order = getOrder(sort);
 
     const [watchables, total] = await this.watchableRepository.findAndCount({
+      //relations: ['genres'],
+      where,
+      order,
+      take: limit,
+      skip: offset,
+    });
+    /*const watchables = await this.watchableRepository.find({
+      relations: ['genres'],
       where,
       order,
       take: limit,
       skip: offset,
     });
 
+    const total = await this.watchableRepository.count({ where });*/
+
     return {
       totalItems: total,
       items: watchables,
-      page,
-      size
+      page: (page + 1),
+      size: size
     };
   }
 
   async findOne(id: number) {
-    return await this.watchableRepository.findOneBy({ id });
+    return await this.watchableRepository.findOne({ relations: ["genres"], where: { id: id } });
   }
 
   async update(id: number, updateWatchableDto: UpdateWatchableDto) {
