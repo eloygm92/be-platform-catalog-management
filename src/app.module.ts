@@ -16,8 +16,8 @@ import { Episode } from './episode/entities/episode.entity';
 import { WatchlistModule } from './watchlist/watchlist.module';
 import { Watchlist } from './watchlist/entities/watchlist.entity';
 import { ExtractorModule } from './extractor/extractor.module';
-import { ScheduleModule } from "@nestjs/schedule";
-import { Genre } from "./watchable/entities/genre.entity";
+import { ScheduleModule } from '@nestjs/schedule';
+import { Genre } from './watchable/entities/genre.entity';
 
 @Module({
   imports: [
@@ -37,7 +37,15 @@ import { Genre } from "./watchable/entities/genre.entity";
       retryAttempts: 5,
       poolSize: 50,
     }),
-    TypeOrmModule.forFeature([User, Provider, Watchable, Season, Episode, Watchlist, Genre]),
+    TypeOrmModule.forFeature([
+      User,
+      Provider,
+      Watchable,
+      Season,
+      Episode,
+      Watchlist,
+      Genre,
+    ]),
     ScheduleModule.forRoot(),
     UserModule,
     ProviderModule,

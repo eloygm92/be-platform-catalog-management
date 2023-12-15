@@ -2,40 +2,40 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  ManyToMany, ManyToOne,
+  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
-  UpdateDateColumn
-} from "typeorm";
+  UpdateDateColumn,
+} from 'typeorm';
 import { Provider } from '../../provider/entities/provider.entity';
 import { Season } from '../../season/entities/season.entity';
 import { Watchlist } from '../../watchlist/entities/watchlist.entity';
-import { Genre } from "./genre.entity";
+import { Genre } from './genre.entity';
 
 @Entity()
 export class Watchable {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "varchar", length: 200, nullable: true })
+  @Column({ type: 'varchar', length: 200, nullable: true })
   name: string;
 
-  @Column({ type: "varchar", length: 250, nullable: true })
+  @Column({ type: 'varchar', length: 250, nullable: true })
   original_name: string;
 
   @Column()
   external_id: number;
 
-  @Column({ type: "text" })
+  @Column({ type: 'text' })
   overview: string;
 
   @Column({ type: 'float', nullable: true })
   vote_average: number;
 
-  @Column({ type: 'float', nullable: true})
+  @Column({ type: 'float', nullable: true })
   vote_count: number;
 
-  @Column({ type: 'float', nullable: true})
+  @Column({ type: 'float', nullable: true })
   popularity: number;
 
   @Column({ type: 'enum', enum: ['movie', 'tv'] })
@@ -64,6 +64,9 @@ export class Watchable {
     onUpdate: 'CURRENT_TIMESTAMP(6)',
   })
   updated_at: Date;
+
+  @Column({ type: 'boolean', default: true })
+  control: boolean;
 
   @ManyToMany(() => Provider, (provider) => provider.watchables)
   provider: Provider[];

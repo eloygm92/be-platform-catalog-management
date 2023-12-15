@@ -3,10 +3,12 @@ import {
   CreateDateColumn,
   Entity,
   JoinTable,
-  ManyToMany,
+  ManyToMany, ManyToOne, OneToMany,
+  OneToOne,
+  PrimaryColumn,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+  UpdateDateColumn
+} from "typeorm";
 import { Watchable } from '../../watchable/entities/watchable.entity';
 
 @Entity()
