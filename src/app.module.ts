@@ -34,7 +34,7 @@ import { Genre } from './watchable/entities/genre.entity';
       entities: [User, Provider, Watchable, Season, Episode, Watchlist, Genre],
       synchronize: false,
       logging: true,
-      retryAttempts: 5,
+      retryAttempts: 10,
       poolSize: 50,
     }),
     TypeOrmModule.forFeature([

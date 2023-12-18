@@ -18,7 +18,7 @@ export class Episode {
   @JoinColumn({ name: 'season_id' })
   season: number;
 
-  @Column({ type: 'varchar', length: 100, nullable: false })
+  @Column({ type: 'varchar', length: 250, nullable: false })
   name: string;
 
   @Column({ type: 'int', nullable: true, name: 'number' })
@@ -26,6 +26,12 @@ export class Episode {
 
   @Column({ type: 'text', nullable: true })
   overview: string;
+
+  @Column({ type: 'date', nullable: true })
+  air_date: Date;
+
+  @Column({ type: 'int', nullable: false })
+  external_id: number;
 
   @Column({ type: 'int', nullable: true })
   vote_average: number;
