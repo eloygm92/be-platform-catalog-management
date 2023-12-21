@@ -47,6 +47,9 @@ export class Season {
   @Column({ type: 'int', nullable: true })
   vote_count: number;
 
+  @Column({ type: 'boolean', default: true })
+  control: boolean;
+
   @CreateDateColumn({
     type: 'timestamp',
     name: 'created_at',

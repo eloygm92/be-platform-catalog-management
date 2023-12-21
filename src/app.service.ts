@@ -28,13 +28,10 @@ export class AppService {
   }
   private API_OPTIONS: object;
 
-  getHello(): string {
-    return 'Hello World!';
-  }
-
   //@Interval(4000)
   async handleTaskWatchableMovie() {
     const watchablesToFetch = await this.watchableRepository.find({
+      relations: ['provider'],
       where: { type: 'movie' },
       order: { updated_at: 'ASC' },
       take: 50,
@@ -98,13 +95,13 @@ export class AppService {
     return watchablesToFetch;
   }
 
-  //@Interval(6000)
+  //@Interval(10000)
   async handleTaskWatchableTv() {
     const watchablesToFetch = await this.watchableRepository.find({
-      relations: ['seasons', 'seasons.episodes'],
+      relations: ['seasons', 'provider', 'seasons.episodes'],
       where: { type: 'tv' },
       order: { updated_at: 'ASC' },
-      take: 50,
+      take: 20,
     });
     if (watchablesToFetch) {
       const genres = await this.genreRepository.find();
@@ -147,7 +144,10 @@ export class AppService {
                           providerAux.external_id === provider.provider_id,
                       ),
                   );
-                  watchable.provider = [...watchable.provider, ...providesAux];
+                  watchable.provider =
+                    watchable.provider?.length > 0
+                      ? [...watchable.provider, ...providesAux]
+                      : providesAux;
                 }
               }
               watchable.name = dataJson.name;
@@ -171,7 +171,7 @@ export class AppService {
               );
             }
             watchable.control = !watchable.control;
-            this.watchableRepository.save(watchable);
+            await this.watchableRepository.save(watchable);
           })
           .catch((err) => console.log(err));
       });
@@ -193,10 +193,12 @@ export class AppService {
         seasonAux.episode_count = season.episode_count;
         seasonAux.season_number = season.season_number;
         seasonAux.vote_average = season.vote_average;
+        seasonAux.vote_count = season.vote_count;
         seasonAux.episodes = await this.getEpisodes(
           watchable.external_id,
           seasonAux,
         );
+        seasonAux.control = !seasonAux.control;
         seasons.push(seasonAux);
       } else {
         const newSeason = new Season();
@@ -208,6 +210,7 @@ export class AppService {
         newSeason.season_number = season.season_number;
         newSeason.external_id = season.id;
         newSeason.vote_average = season.vote_average;
+        newSeason.vote_count = season.vote_count;
         newSeason.episodes = await this.getEpisodes(
           watchable.external_id,
           season,
