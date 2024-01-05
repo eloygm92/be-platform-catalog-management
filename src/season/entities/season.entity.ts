@@ -20,6 +20,9 @@ export class Season {
   @JoinColumn({ name: 'watchable_id' })
   watchable: Watchable;
 
+  @Column({ type: 'int', name: 'watchable_id', nullable: false })
+  watchableId: number;
+
   @Column({ type: 'varchar', length: 200, nullable: false })
   name: string;
 

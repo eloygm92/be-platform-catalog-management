@@ -35,7 +35,7 @@ import { Genre } from './watchable/entities/genre.entity';
       synchronize: false,
       logging: true,
       retryAttempts: 15,
-      //poolSize: 30,
+      poolSize: 30,
     }),
     TypeOrmModule.forFeature([
       User,
