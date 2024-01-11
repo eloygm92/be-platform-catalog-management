@@ -18,6 +18,7 @@ import { Watchlist } from './watchlist/entities/watchlist.entity';
 import { ExtractorModule } from './extractor/extractor.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { Genre } from './watchable/entities/genre.entity';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { Genre } from './watchable/entities/genre.entity';
     EpisodeModule,
     WatchlistModule,
     ExtractorModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
