@@ -8,10 +8,11 @@ import { GoogleStrategy } from "./strategies/google.strategy";
 import { JwtStrategy } from "./strategies/jwt.strategy";
 import { AccessTokenStrategy } from "./strategies/accessToken.strategy";
 import { RefreshTokenStrategy } from "./strategies/refreshToken.strategy";
+import { Role } from "../user/entities/role.entity";
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, Role]),
     JwtModule.register({
       secret: process.env.ACCESS_TOKEN_SECRET,
       signOptions: { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION },

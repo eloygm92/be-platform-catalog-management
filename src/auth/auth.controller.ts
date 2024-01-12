@@ -15,7 +15,8 @@ export class AuthController {
     @Body() createUserDto: CreateUserDto,
     @Res() res: Response
   ) {
-    const data = this.authService.signUp(createUserDto);
+    const data = await this.authService.signUp(createUserDto);
+
     res.cookie('access_token', data['tokens']['accessToken'], {
       maxAge: Number((process.env.ACCESS_TOKEN_EXPIRATION).slice(0,-1)) * 1000,
       sameSite: true,

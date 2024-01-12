@@ -8,6 +8,7 @@ import { Repository } from "typeorm";
 import { CreateUserDto } from "../user/dto/create-user.dto";
 import * as bcrypt from 'bcrypt';
 import * as process from "process";
+import { Role } from "../user/entities/role.entity";
 
 @Injectable()
 export class AuthService {
@@ -15,6 +16,8 @@ export class AuthService {
     private jwtService: JwtService,
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @InjectRepository(Role)
+    private roleRepository: Repository<Role>,
   ) {}
 
   async signUp(createUserDto: CreateUserDto) {
@@ -27,16 +30,21 @@ export class AuthService {
     createUserDto.password =  await this.hashData(createUserDto.password);
 
     const newUser = this.userRepository.create(createUserDto);
+    newUser.role  = await this.roleRepository.findOneBy({ name: 'user' });
+
     await this.userRepository.save(newUser);
 
     const tokens = await this.getTokens(newUser.id, newUser.username);
     await this.updateRefreshToken(newUser.id, tokens.refreshToken);
 
-    return { tokens: tokens, user: newUser };
+    return { tokens: tokens, user: { id: newUser.id, username: newUser.username, email: newUser.email  } };
   }
 
   async signIn(data: AuthDto) {
-    const user = await this.userRepository.findOneBy({ username: data.username });
+    const user = await this.userRepository.findOne({
+      relations: ['role'],
+      where: [{ username: data.username }, { deactivate_at: null }],
+  });
 
     if (!user) throw new BadRequestException('User does not exist');
 
@@ -47,7 +55,7 @@ export class AuthService {
     const tokens = await this.getTokens(user.id, user.username);
     await this.updateRefreshToken(user.id, tokens.refreshToken);
 
-    return { tokens: tokens, user: user };
+    return { tokens: tokens, user: { id: user.id, username: user.username, email: user.email  } };
   }
 
   async logout(userId: number) {

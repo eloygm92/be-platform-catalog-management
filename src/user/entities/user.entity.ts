@@ -1,5 +1,13 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Watchlist } from '../../watchlist/entities/watchlist.entity';
+import { Role } from './role.entity';
 
 @Entity()
 export class User {
@@ -17,6 +25,10 @@ export class User {
 
   @Column({ type: 'varchar', length: 80 })
   refresh_token: string;
+
+  @ManyToOne(() => Role, (role) => role.users)
+  @JoinColumn({ name: 'role_id' })
+  role: Role;
 
   @Column()
   created_at: Date;

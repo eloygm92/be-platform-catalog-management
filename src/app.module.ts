@@ -19,6 +19,7 @@ import { ExtractorModule } from './extractor/extractor.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { Genre } from './watchable/entities/genre.entity';
 import { AuthModule } from './auth/auth.module';
+import { Role } from './user/entities/role.entity';
 
 @Module({
   imports: [
@@ -32,7 +33,16 @@ import { AuthModule } from './auth/auth.module';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [User, Provider, Watchable, Season, Episode, Watchlist, Genre],
+      entities: [
+        User,
+        Provider,
+        Watchable,
+        Season,
+        Episode,
+        Watchlist,
+        Genre,
+        Role,
+      ],
       synchronize: false,
       logging: true,
       retryAttempts: 15,
