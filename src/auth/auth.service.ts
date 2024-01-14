@@ -55,11 +55,11 @@ export class AuthService {
     const tokens = await this.getTokens(user.id, user.username);
     await this.updateRefreshToken(user.id, tokens.refreshToken);
 
-    return { tokens: tokens, user: { id: user.id, username: user.username, email: user.email  } };
+    return { tokens: tokens, user: { id: user.id, username: user.username, email: user.email, role: user.role.name  } };
   }
 
-  async logout(userId: number) {
-    const user = await this.userRepository.findOne({where: {id: userId}});
+  async logout(userId: number | string) {
+    const user = await this.userRepository.findOne({where: {id: Number(userId)}});
     user.refresh_token = null;
     await this.userRepository.save(user);
     return {message: 'Logout success'};

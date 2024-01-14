@@ -54,9 +54,9 @@ export class AuthController {
     return res.status(HttpStatus.CREATED).json(dataLogin['user']);
   }
 
-  @Get('logout')
-  logout(@Req() req: Request) {
-    return this.authService.logout(req.body['user']['sub']);
+  @Post('logout')
+  logout(@Req() req: Request, @Body() body: { user: { sub: number | string } }) {
+    return this.authService.logout(body.user.sub);
   }
 
   @Get('google')
