@@ -66,7 +66,7 @@ export class AuthService {
   }
 
   hashData(data: string) {
-    return bcrypt.hash(data, 10);
+    return bcrypt.hash(data, process.env.SALT);
   }
 
   async updateRefreshToken(userId: number, refreshToken: string) {
@@ -129,5 +129,21 @@ export class AuthService {
     if (!user) return null;
 
     return user;
+  }
+
+  async refreshToken(refreshToken: string) {
+    const decodeRefreshToken = await this.jwtService.decode(refreshToken);
+    const user = await this.userRepository.findOne({where: {username: decodeRefreshToken['username']}});
+
+    if (!user) throw new BadRequestException('Invalid refresh token');
+
+    const payload = {
+      sub: user.id,
+      username: user.username,
+    };
+
+    const accessToken = await this.jwtService.signAsync(payload, { secret: process.env.ACCESS_TOKEN_SECRET, expiresIn: process.env.ACCESS_TOKEN_EXPIRATION });
+
+    return { accessToken };
   }
 }

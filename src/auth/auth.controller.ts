@@ -4,6 +4,7 @@ import { Response } from 'express'
 import { GoogleOauthGuard } from "./guards/google-oauth.guard";
 import { CreateUserDto } from "../user/dto/create-user.dto";
 import { AuthDto } from "./dto/create-auth.dto";
+import { Request } from 'express';
 import * as process from "process";
 
 @Controller('auth')
@@ -78,5 +79,18 @@ export class AuthController {
     });
 
     return res.status(HttpStatus.OK);
+  }
+
+  @Get('refresh')
+  async refresh(@Req() req: Request, @Res() res: Response) {
+    const { accessToken } = await this.authService.refreshToken(req.cookies['refresh_token']);
+
+    res.cookie('access_token', accessToken, {
+      maxAge: Number((process.env.ACCESS_TOKEN_EXPIRATION).slice(0,-1)) * 1000,
+      sameSite: true,
+      secure: false,
+    })
+
+    return res.status(HttpStatus.OK).json({ accessToken });
   }
 }
