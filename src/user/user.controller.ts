@@ -1,14 +1,12 @@
 import {
   Controller,
   Get,
-  Post,
   Body,
   Patch,
   Param,
   Delete,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Pagination, PaginationParams } from "../helpers/decorators/params-params.decorator";
 import { Sorting, SortingParams } from "../helpers/decorators/sorting-params.decorator";
@@ -30,6 +28,21 @@ export class UserController {
     @FilteringParams(['id', 'username', 'email', 'role.name']) filter?: Filtering[],
   ) {
     return this.userService.findAll(paginationParams, sort, filter);
+  }
+
+  @Get('roles')
+  findAllRoles() {
+    return this.userService.findAllRoles();
+  }
+
+  @Get('deactivate/:id')
+  deactivate(@Param('id') id: number) {
+    return this.userService.deactivate(id);
+  }
+
+  @Get('restore/:id')
+  restore(@Param('id') id: number) {
+    return this.userService.restore(id);
   }
 
   @Get(':id')

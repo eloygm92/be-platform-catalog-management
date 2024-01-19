@@ -1,10 +1,12 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Watchlist } from '../../watchlist/entities/watchlist.entity';
 import { Role } from './role.entity';
@@ -30,13 +32,22 @@ export class User {
   @JoinColumn({ name: 'role_id' })
   role: Role;
 
-  @Column()
+  @CreateDateColumn({
+    type: 'timestamp',
+    name: 'created_at',
+    default: () => 'CURRENT_TIMESTAMP(6)',
+  })
   created_at: Date;
 
-  @Column()
+  @UpdateDateColumn({
+    type: 'timestamp',
+    name: 'updated_at',
+    default: () => 'CURRENT_TIMESTAMP(6)',
+    onUpdate: 'CURRENT_TIMESTAMP(6)',
+  })
   updated_at: Date;
 
-  @Column()
+  @Column({ type: 'timestamp', name: 'deactivate_at', nullable: true })
   deactivate_at: Date;
 
   @OneToMany(() => Watchlist, (watchlist) => watchlist.user)

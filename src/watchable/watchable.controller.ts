@@ -58,9 +58,24 @@ export class WatchableController {
     return this.watchableService.findAll(paginationParams, sort, filter);
   }
 
+  @Get('genre')
+  getGenres() {
+    return this.watchableService.getGenres();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.watchableService.findOne(+id);
+  }
+
+  @Get('deactivate/:id')
+  deactivate(@Param('id') id: number) {
+    return this.watchableService.deactivate(id);
+  }
+
+  @Get('restore/:id')
+  restore(@Param('id') id: number) {
+    return this.watchableService.restore(id);
   }
 
   @Patch(':id')

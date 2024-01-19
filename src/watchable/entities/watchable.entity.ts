@@ -65,6 +65,9 @@ export class Watchable {
   })
   updated_at: Date;
 
+  @Column({ type: 'timestamp', name: 'deactivate_at', nullable: true })
+  deactivate_at: Date;
+
   @Column({ type: 'boolean', default: true })
   control: boolean;
 

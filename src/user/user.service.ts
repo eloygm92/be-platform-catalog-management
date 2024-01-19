@@ -1,5 +1,4 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
@@ -58,21 +57,38 @@ export class UserService {
   async update(id: number, updateUserDto: UpdateUserDto) {
     const { role, ...updateUserDtoData } = updateUserDto;
 
-    const roleExist = await this.roleRepository.findOneBy({ name: role.name });
+    if (role) {
+      const roleExist = await this.roleRepository.findOneBy({ name: role.name });
 
-    if (!roleExist)
-      throw new BadRequestException('Role does not exist');
+      if (!roleExist)
+        throw new BadRequestException("Role does not exist");
 
-    updateUserDto.role = roleExist;
+      updateUserDto.role = roleExist;
+    }
 
     if (updateUserDtoData.password)
       updateUserDtoData.password = await bcrypt.hash(updateUserDtoData.password, process.env.SALT);
 
-    const update = await this.userRepository.update(id, { ...updateUserDtoData, role: role });
-    return update;
+    return await this.userRepository.update(id, { ...updateUserDtoData, role: role });
   }
 
   remove(id: number) {
     return `This action removes a #${id} user`;
+  }
+
+  async findAllRoles() {
+    return await this.roleRepository.find();
+  }
+
+  async deactivate(id: number) {
+    const user = await this.userRepository.findOne({where: {id: id}});
+    user.deactivate_at = new Date();
+    return await this.userRepository.save(user);
+  }
+
+  async restore(id: number) {
+    const user = await this.userRepository.findOne({where: {id: id}});
+    user.deactivate_at = null;
+    return await this.userRepository.save(user);
   }
 }

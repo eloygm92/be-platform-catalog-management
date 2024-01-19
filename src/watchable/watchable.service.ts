@@ -10,6 +10,7 @@ import { Pagination } from "../helpers/decorators/params-params.decorator";
 import { Sorting } from "../helpers/decorators/sorting-params.decorator";
 import { getOrder, getWhere } from "../helpers/typeOrm.helper";
 import { PaginatedResource } from "../helpers/paginatedResource.type";
+import { Genre } from "./entities/genre.entity";
 
 @Injectable()
 export class WatchableService {
@@ -18,6 +19,8 @@ export class WatchableService {
     private watchableRepository: Repository<Watchable>,
     @InjectRepository(Provider)
     private providerRepository: Repository<Provider>,
+    @InjectRepository(Genre)
+    private genresRepository: Repository<Genre>
   ) {}
   async create(createWatchableDto: CreateWatchableDto) {
     const { providers, ...createWatchableDataDto } = createWatchableDto;
@@ -67,7 +70,11 @@ export class WatchableService {
   }
 
   async findOne(id: number) {
-    return await this.watchableRepository.findOne({ relations: ["genres"], where: { id: id } });
+    return await this.watchableRepository.findOne({ relations: ["genres", "provider"], where: { id: id } });
+  }
+
+  async getGenres() {
+    return await this.genresRepository.find();
   }
 
   async update(id: number, updateWatchableDto: UpdateWatchableDto) {
@@ -108,6 +115,18 @@ export class WatchableService {
     await this.providerRepository.save(providersData);
     const removed = await this.watchableRepository.delete(id);
     return removed.affected === 1;
+  }
+
+  async deactivate(id: number) {
+    const watchable = await this.watchableRepository.findOne({where: {id: id}});
+    watchable.deactivate_at = new Date();
+    return await this.watchableRepository.save(watchable);
+  }
+
+  async restore(id: number) {
+    const watchable = await this.watchableRepository.findOne({where: {id: id}});
+    watchable.deactivate_at = null;
+    return await this.watchableRepository.save(watchable);
   }
 
   private async saveProviders(watchable: Watchable, providers: number[]) {
