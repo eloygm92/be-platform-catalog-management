@@ -66,7 +66,7 @@ export class AuthService {
   }
 
   hashData(data: string) {
-    return bcrypt.hash(data, process.env.SALT);
+    return bcrypt.hash(data, Number(process.env.SALT));
   }
 
   async updateRefreshToken(userId: number, refreshToken: string) {
