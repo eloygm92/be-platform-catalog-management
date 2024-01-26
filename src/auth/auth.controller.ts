@@ -21,13 +21,13 @@ export class AuthController {
     res.cookie('access_token', data['tokens']['accessToken'], {
       maxAge: Number((process.env.ACCESS_TOKEN_EXPIRATION).slice(0,-1)) * 1000,
       sameSite: 'none',
-      secure: false,
+      secure: true,
     })
 
     res.cookie('refresh_token', data['tokens']['refreshToken'], {
       maxAge: Number((process.env.REFRESH_TOKEN_EXPIRATION).slice(0,-1)) * 1000 * 60 * 60 * 24,
       sameSite: 'none',
-      secure: false,
+      secure: true,
     })
 
     return res.status(HttpStatus.CREATED).json(data['user']);
@@ -43,13 +43,13 @@ export class AuthController {
     res.cookie('access_token', dataLogin['tokens']['accessToken'], {
       maxAge: Number((process.env.ACCESS_TOKEN_EXPIRATION).slice(0,-1)) * 1000,
       sameSite: 'none',
-      secure: false,
+      secure: true,
     })
 
     res.cookie('refresh_token', dataLogin['tokens']['refreshToken'], {
       maxAge: Number((process.env.REFRESH_TOKEN_EXPIRATION).slice(0,-1)) * 1000 * 60 * 60 * 24,
       sameSite: 'none',
-      secure: false,
+      secure: true,
     })
 
     return res.status(HttpStatus.CREATED).json(dataLogin['user']);
@@ -75,7 +75,7 @@ export class AuthController {
     res.cookie('access_token', token, {
       maxAge: 2592000000,
       sameSite: 'none',
-      secure: false,
+      secure: true,
     });
 
     return res.status(HttpStatus.OK);
@@ -88,7 +88,7 @@ export class AuthController {
     res.cookie('access_token', accessToken, {
       maxAge: Number((process.env.ACCESS_TOKEN_EXPIRATION).slice(0,-1)) * 1000,
       sameSite: 'none',
-      secure: false,
+      secure: true,
     })
 
     return res.status(HttpStatus.OK).json({ accessToken });
