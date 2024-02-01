@@ -21,7 +21,7 @@ export const SortingParams = createParamDecorator(
       throw new BadRequestException('Invalid sort parameter');
 
     // check the format of the sort query param
-    const sortPattern = /^([a-zA-Z0-9]+):(asc|desc)$/;
+    const sortPattern = /^([a-zA-Z0-9_]+):(asc|desc)$/;
     if (!sort.match(sortPattern))
       throw new BadRequestException('Invalid sort parameter');
 

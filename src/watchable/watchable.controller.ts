@@ -26,8 +26,8 @@ export class WatchableController {
   @Get()
   findAll(
     @PaginationParams() paginationParams: Pagination,
-    @SortingParams(['id', 'type', 'name', 'external_id', 'release_date', 'popularity', 'vote_average', 'genres', 'popularity']) sort?: Sorting,
-    @FilteringParams(['id', 'type', 'name', 'external_id', 'release_date', 'popularity', 'vote_average', 'genres.id']) filter?: Filtering[],
+    @SortingParams(['id', 'type', 'name', 'external_id', 'release_date', 'popularity', 'vote_average', 'vote_count', 'genres']) sort?: Sorting,
+    @FilteringParams(['id', 'type', 'name', 'external_id', 'release_date', 'popularity', 'vote_average', 'vote_count', 'genres.id', 'provider.id']) filter?: Filtering[],
   ) {
     return this.watchableService.findAll(paginationParams, sort, filter);
   }
@@ -35,8 +35,8 @@ export class WatchableController {
   @Get('movies')
   findMovies(
     @PaginationParams() paginationParams: Pagination,
-    @SortingParams(['id', 'type', 'name', 'external_id', 'release_date', 'popularity', 'vote_average', 'genres', 'popularity']) sort?: Sorting,
-    @FilteringParams(['id', 'type', 'name', 'external_id', 'release_date', 'popularity', 'vote_average', 'genres.id']) filter?: Filtering[],
+    @SortingParams(['id', 'type', 'name', 'external_id', 'release_date', 'popularity', 'vote_average', 'vote_count', 'genres']) sort?: Sorting,
+    @FilteringParams(['id', 'type', 'name', 'external_id', 'release_date', 'popularity', 'vote_average', 'vote_count', 'genres.id', 'provider.id']) filter?: Filtering[],
   ) {
     if (!filter) {
       filter = [{ property: 'type', rule: 'eq', value: 'movie' } as Filtering];
@@ -48,8 +48,8 @@ export class WatchableController {
   @Get('series')
   findSeries(
     @PaginationParams() paginationParams: Pagination,
-    @SortingParams(['id', 'type', 'name', 'external_id', 'release_date', 'popularity', 'vote_average', 'genres', 'popularity']) sort?: Sorting,
-    @FilteringParams(['id', 'type', 'name', 'external_id', 'release_date', 'popularity', 'vote_average', 'genres.id']) filter?: Filtering[],
+    @SortingParams(['id', 'type', 'name', 'external_id', 'release_date', 'popularity', 'vote_average', 'vote_count', 'genres',]) sort?: Sorting,
+    @FilteringParams(['id', 'type', 'name', 'external_id', 'release_date', 'popularity', 'vote_average', 'vote_count', 'genres.id', 'provider.id']) filter?: Filtering[],
   ) {
     if (!filter) {
       filter = [{ property: 'type', rule: 'eq', value: 'tv' } as Filtering];
