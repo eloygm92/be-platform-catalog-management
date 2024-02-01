@@ -1,6 +1,6 @@
 import { Sorting } from "./decorators/sorting-params.decorator";
 import { Filtering, FilterRule } from "./decorators/filtering-params.decorator";
-import { ILike, In, IsNull, LessThan, LessThanOrEqual, MoreThan, MoreThanOrEqual, Not } from "typeorm";
+import { Between, ILike, In, IsNull, LessThan, LessThanOrEqual, MoreThan, MoreThanOrEqual, Not } from "typeorm";
 
 export const getOrder = (sort: Sorting) => sort ? { [sort.property]: sort.direction } : {};
 
@@ -80,6 +80,13 @@ export const getWhere = (filter: Filtering[]) => {
         const [entity, property] = filter.property.split('.');
         where.push({ [entity]: { [property]: Not(In(filter.value.split(","))) } });
       } else where.push({ [filter.property]: Not(In(filter.value.split(","))) });
+    }
+    if (filter.rule == FilterRule.BETWEEN) {
+      const [from, to] = filter.value.split(",");
+      if (filter.property.includes('.')) {
+        const [entity, property] = filter.property.split('.');
+        where.push({ [entity]: { [property]: Between(from, to) } });
+      } else where.push({ [filter.property]: Between(from, to) });
     }
   });
   return where;

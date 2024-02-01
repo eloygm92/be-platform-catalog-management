@@ -25,6 +25,7 @@ export enum FilterRule {
   NOT_IN = 'nin',
   IS_NULL = 'isnull',
   IS_NOT_NULL = 'isnotnull',
+  BETWEEN = 'between',
 }
 
 export const FilteringParams = createParamDecorator(
@@ -43,7 +44,7 @@ export const FilteringParams = createParamDecorator(
     filter.forEach((filter) => {
       if (
         !filter.match(
-          /^[a-zA-Z0-9_\.]+:(eq|neq|gt|gte|lt|lte|like|nlike|in|nin):[a-zA-Z0-9_,]+$/,
+          /^[a-zA-Z0-9_\.]+:(eq|neq|gt|gte|lt|lte|like|nlike|in|nin|between):[a-zA-Z0-9_,\-]+$/,
         ) &&
         !filter.match(/^[a-zA-Z0-9_\.]+:(isnull|isnotnull)$/)
       ) {
