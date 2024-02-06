@@ -371,10 +371,9 @@ export class AppService {
               watchable,
               dataJson,
             );
-            watchableData.control = !watchable.control;
-
-            await this.watchableRepository.save(watchableData);
           }
+          watchableData.control = !watchable.control;
+          await this.watchableRepository.save(watchableData);
         } catch (err) {
           console.log(err);
         }
