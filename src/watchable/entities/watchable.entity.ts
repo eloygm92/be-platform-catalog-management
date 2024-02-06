@@ -74,7 +74,7 @@ export class Watchable {
   @ManyToMany(() => Provider, (provider) => provider.watchables)
   provider: Provider[];
 
-  @OneToMany(() => Season, (season) => season.watchable, { cascade: true })
+  @OneToMany(() => Season, (season) => season.watchable)
   seasons: Season[];
 
   @OneToMany(() => Watchlist, (watchlist) => watchlist.watchable, {

@@ -12,6 +12,7 @@ export class AppController {
 
   @Get('SynchroTv')
   getSyncroTv(): Promise<any> {
-    return this.appService.handleTaskWatchableTv();
+    //return this.appService.handleTaskWatchableTv();
+    return this.appService.handleTaskTv();
   }
 }

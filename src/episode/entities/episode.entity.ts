@@ -14,7 +14,10 @@ export class Episode {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Season, (season) => season.episodes)
+  @ManyToOne(() => Season, (season) => season.episodes, {
+    cascade: true,
+    orphanedRowAction: 'delete',
+  })
   @JoinColumn({ name: 'season_id' })
   season: number;
 

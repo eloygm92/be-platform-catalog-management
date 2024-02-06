@@ -16,7 +16,10 @@ export class Season {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Watchable, (watchable) => watchable.seasons)
+  @ManyToOne(() => Watchable, (watchable) => watchable.seasons, {
+    cascade: true,
+    orphanedRowAction: 'delete',
+  })
   @JoinColumn({ name: 'watchable_id' })
   watchable: Watchable;
 
@@ -68,6 +71,6 @@ export class Season {
   })
   updated_at: Date;
 
-  @OneToMany(() => Episode, (episode) => episode.season, { cascade: true })
+  @OneToMany(() => Episode, (episode) => episode.season)
   episodes: Episode[];
 }
