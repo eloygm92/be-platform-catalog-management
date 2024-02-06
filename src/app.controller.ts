@@ -7,7 +7,8 @@ export class AppController {
 
   @Get('SynchroMovie')
   getSyncroMovie(): Promise<any> {
-    return this.appService.handleTaskWatchableMovie();
+    //return this.appService.handleTaskWatchableMovie();
+    return this.appService.handleTaskMovie();
   }
 
   @Get('SynchroTv')

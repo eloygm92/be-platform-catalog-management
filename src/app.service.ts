@@ -100,6 +100,89 @@ export class AppService {
     return watchablesToFetch;
   }
 
+  async handleTaskMovie(watchableId?: number | undefined) {
+    let watchablesToFetch: Watchable[] = [];
+    if (watchableId) {
+      watchablesToFetch = await this.watchableRepository.find({
+        relations: ['provider'],
+        //where: { type: 'tv' },
+        where: { id: watchableId },
+        order: { updated_at: 'ASC' },
+        //take: 20,
+      });
+    } else {
+      watchablesToFetch = await this.watchableRepository.find({
+        relations: ['provider'],
+        where: { type: 'movie' },
+        order: { updated_at: 'ASC' },
+        take: 20,
+      });
+    }
+
+    if (watchablesToFetch.length > 0) {
+      const genres = await this.genreRepository.find();
+      const providers = await this.providersRepository.find();
+      for await (const watchable of watchablesToFetch) {
+        const dataJson: any = await fetch(
+          `https://api.themoviedb.org/3/movie/${watchable.external_id}?language=es-ES`,
+          this.API_OPTIONS,
+        ).then((res) => res.json());
+        const watchableData: Watchable = Object.assign({}, watchable);
+        if (dataJson.status_code === 34) {
+          watchableData.popularity = 0;
+          watchableData.name = watchable.original_name;
+          watchableData.overview = '';
+        } else {
+          const providersData: any = await fetch(
+            `https://api.themoviedb.org/3/movie/${watchable.external_id}/watch/providers`,
+            this.API_OPTIONS,
+          )
+            .then((res) => res.json())
+            .then((dataJson) => dataJson.results);
+
+          if (providersData?.ES) {
+            if (providersData.ES.flatrate?.length > 0) {
+              watchableData.provider = providersData.ES.flatrate.map(
+                (provider: any) =>
+                  providers.find(
+                    (providerAux) =>
+                      providerAux.external_id === provider.provider_id,
+                  ),
+              );
+            }
+            if (providersData?.ES?.ads?.length > 0) {
+              const providesAux = providersData.ES.ads.map((provider: any) =>
+                providers.find(
+                  (providerAux) =>
+                    providerAux.external_id === provider.provider_id,
+                ),
+              );
+              watchableData.provider =
+                watchable.provider?.length > 0
+                  ? [...watchable.provider, ...providesAux]
+                  : providesAux;
+            }
+          }
+          watchableData.name = dataJson.title;
+          watchableData.overview = dataJson.overview;
+          watchableData.release_date =
+            dataJson.release_date === '' ? null : dataJson.release_date;
+          watchableData.vote_average = dataJson.vote_average;
+          watchableData.vote_count = dataJson.vote_count;
+          watchableData.poster_path = dataJson.poster_path;
+          dataJson.genres?.length > 0
+            ? (watchable.genres = dataJson.genres.map((genre: any) =>
+                genres.find((genreAux) => genreAux.external_id === genre.id),
+              ))
+            : '';
+          watchableData.popularity = dataJson.popularity;
+        }
+        watchableData.control = !watchable.control;
+        await this.watchableRepository.save(watchableData);
+      }
+    }
+  }
+
   //@Interval(10000)
   /*async handleTaskWatchableTv() {
     const watchablesToFetch = await this.watchableRepository.find({
@@ -203,7 +286,7 @@ export class AppService {
     return watchablesToFetch;
   }*/
 
-  @Interval(10000)
+  //@Interval(10000)
   async handleTaskTv(watchableId?: number | undefined) {
     let watchablesToFetch: Watchable[] = [];
     if (watchableId) {
