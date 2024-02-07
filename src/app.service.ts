@@ -34,7 +34,7 @@ export class AppService {
   private API_OPTIONS: object;
 
   //@Interval(4000)
-  async handleTaskWatchableMovie() {
+  /*async handleTaskWatchableMovie() {
     const watchablesToFetch = await this.watchableRepository.find({
       relations: ['provider'],
       where: { type: 'movie' },
@@ -98,8 +98,9 @@ export class AppService {
       });
     }
     return watchablesToFetch;
-  }
+  }*/
 
+  //@Interval(4000)
   async handleTaskMovie(watchableId?: number | undefined) {
     let watchablesToFetch: Watchable[] = [];
     if (watchableId) {
