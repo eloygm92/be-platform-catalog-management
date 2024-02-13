@@ -3,13 +3,12 @@ import {
   CreateDateColumn,
   Entity,
   JoinTable,
-  ManyToMany, ManyToOne, OneToMany,
-  OneToOne,
-  PrimaryColumn,
+  ManyToMany,
   PrimaryGeneratedColumn,
-  UpdateDateColumn
-} from "typeorm";
+  UpdateDateColumn,
+} from 'typeorm';
 import { Watchable } from '../../watchable/entities/watchable.entity';
+import { User } from '../../user/entities/user.entity';
 
 @Entity()
 export class Provider {
@@ -53,4 +52,7 @@ export class Provider {
     inverseJoinColumn: { name: 'watchable_id', referencedColumnName: 'id' },
   })
   watchables: Watchable[];
+
+  @ManyToMany(() => User, (user) => user.providers)
+  users: User[];
 }

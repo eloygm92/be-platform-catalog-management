@@ -3,6 +3,8 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -10,6 +12,7 @@ import {
 } from 'typeorm';
 import { Watchlist } from '../../watchlist/entities/watchlist.entity';
 import { Role } from './role.entity';
+import { Provider } from '../../provider/entities/provider.entity';
 
 @Entity()
 export class User {
@@ -52,4 +55,12 @@ export class User {
 
   @OneToMany(() => Watchlist, (watchlist) => watchlist.user)
   watchlists: Watchlist[];
+
+  @ManyToMany(() => Provider, (provider) => provider.users)
+  @JoinTable({
+    name: 'user_provider',
+    joinColumn: { name: 'user_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'provider_id', referencedColumnName: 'id' },
+  })
+  providers: Provider[];
 }
