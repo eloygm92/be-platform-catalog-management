@@ -71,6 +71,8 @@ export class Season {
   })
   updated_at: Date;
 
-  @OneToMany(() => Episode, (episode) => episode.season)
+  @OneToMany(() => Episode, (episode) => episode.season, {
+    onDelete: 'CASCADE',
+  })
   episodes: Episode[];
 }
