@@ -33,7 +33,7 @@ export class AppService {
   }
   private API_OPTIONS: object;
 
-  @Interval(4000)
+  //@Interval(4000)
   async handleTaskMovie(watchableId?: number | undefined) {
     let watchablesToFetch: Watchable[] = [];
     if (watchableId) {
@@ -116,6 +116,7 @@ export class AppService {
         watchableData.control = !watchable.control;
         await this.watchableRepository.save(watchableData);
       }
+      return watchablesToFetch;
     }
   }
 
@@ -315,6 +316,7 @@ export class AppService {
           console.log(err);
         }
       }
+      return watchablesToFetch;
     }
   }
 
