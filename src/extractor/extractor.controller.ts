@@ -14,4 +14,9 @@ export class ExtractorController {
   getUpcomingMovies() {
     return this.extractorService.getUpcomingMovies();
   }
+
+  @Get('tv/upcoming')
+  getUpcomingTv() {
+    return this.extractorService.getAiringTodaySeries();
+  }
 }

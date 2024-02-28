@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import * as process from 'process';
+import * as dayjs from 'dayjs';
 import { constants } from '../constants';
 import { ProviderService } from '../provider/provider.service';
 import { CreateProviderDto } from '../provider/dto/create-provider.dto';
@@ -8,6 +9,8 @@ import { Watchable } from '../watchable/entities/watchable.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Genre } from '../watchable/entities/genre.entity';
 import { Provider } from '../provider/entities/provider.entity';
+import { Season } from '../season/entities/season.entity';
+import { Episode } from '../episode/entities/episode.entity';
 
 @Injectable()
 export class ExtractorService {
@@ -17,6 +20,10 @@ export class ExtractorService {
     private readonly watchableRepository: Repository<Watchable>,
     @InjectRepository(Genre)
     private readonly genreRepository: Repository<Genre>,
+    @InjectRepository(Season)
+    private readonly seasonsRepository: Repository<Season>,
+    @InjectRepository(Episode)
+    private readonly episodesRepository: Repository<Episode>,
   ) {
     this.API_OPTIONS = {
       method: 'GET',
@@ -135,6 +142,53 @@ export class ExtractorService {
     }
   }
 
+  async getAiringTodaySeries() {
+    const baseUrl = `${process.env.API_URL}/${constants.DISCOVER}/${constants.TV}`;
+    const currentDate = dayjs();
+    const prevDate = currentDate.subtract(7, 'd');
+    const futDate = currentDate.add(1, 'M');
+
+    const res = await fetch(
+      `${baseUrl}?air_date.gte=${prevDate.format(
+        'YYYY-MM-DD',
+      )}&air_date.lte=${futDate.format(
+        'YYYY-MM-DD',
+      )}&include_adult=false&include_null_first_air_dates=false&language=es-ES&page=1&sort_by=popularity.desc`,
+      this.API_OPTIONS,
+    );
+    if (res.ok) {
+      const jsonData = await res.json();
+
+      const genresSaved = await this.genreRepository.find();
+      const providersSaved = await this.providerService.findAll();
+      await this.mapperAiringTodaySeries(
+        jsonData.results,
+        genresSaved,
+        providersSaved,
+      );
+      const totalPages = jsonData.total_pages ?? 1;
+
+      for (let i = 2; i <= totalPages; i++) {
+        const nextPage = await fetch(
+          `${baseUrl}?air_date.gte=${prevDate.format(
+            'YYYY-MM-DD',
+          )}&air_date.lte=${futDate.format(
+            'YYYY-MM-DD',
+          )}&include_adult=false&include_null_first_air_dates=false&language=es-ES&page=${i}&sort_by=popularity.desc`,
+          this.API_OPTIONS,
+        );
+        if (nextPage.ok) {
+          const jsonData2 = await nextPage.json();
+          await this.mapperAiringTodaySeries(
+            jsonData2.results,
+            genresSaved,
+            providersSaved,
+          );
+        }
+      }
+    }
+  }
+
   async mapperUpcomingMovies(
     jsonData: any,
     genresSaved: Genre[],
@@ -205,6 +259,190 @@ export class ExtractorService {
           : '';
         watchable.popularity = jsonMovie.popularity;
         await this.watchableRepository.save(watchable);
+      }
+    }
+  }
+
+  async mapperAiringTodaySeries(
+    jsonData: any,
+    genresSaved: Genre[],
+    providersSaved: Provider[],
+  ) {
+    for await (const jsonSerie of jsonData) {
+      if (!jsonSerie.adult) {
+        let watchable = await this.watchableRepository.findOne({
+          relations: ['genres', 'provider'],
+          where: { external_id: jsonSerie.id },
+        });
+
+        if (!watchable) {
+          watchable = new Watchable();
+          watchable = this.watchableRepository.create(watchable);
+        } else {
+          watchable.control = !watchable.control;
+        }
+        const watchableData: any = await fetch(
+          `https://api.themoviedb.org/3/tv/${jsonSerie.id}?append_to_response=watch/providers&language=es-ES`,
+          this.API_OPTIONS,
+        )
+          .then((res) => res.json())
+          .then((dataJson) => dataJson);
+
+        if (watchableData['watch/providers'].results?.ES) {
+          if (
+            watchableData['watch/providers'].results.ES.flatrate?.length > 0
+          ) {
+            watchable.provider = watchableData[
+              'watch/providers'
+            ].results.ES.flatrate.map((provider: any) =>
+              providersSaved.find(
+                (providerAux) =>
+                  providerAux.external_id === provider.provider_id,
+              ),
+            );
+          }
+          if (watchableData['watch/providers'].results?.ES?.ads?.length > 0) {
+            const providesAux = watchableData.results.ES.ads.map(
+              (provider: any) =>
+                providersSaved.find(
+                  (providerAux) =>
+                    providerAux.external_id === provider.provider_id,
+                ),
+            );
+            watchable.provider =
+              watchable.provider?.length > 0
+                ? [...watchable.provider, ...providesAux]
+                : providesAux;
+          }
+        }
+
+        watchable.name = watchableData.name;
+        watchable.original_name = watchableData.original_name;
+        watchable.external_id = jsonSerie.id;
+        watchable.overview = watchableData.overview;
+        watchable.release_date = watchableData.first_air_date;
+        watchable.vote_average = watchableData.vote_average;
+        watchable.vote_count = watchableData.vote_count;
+        watchable.poster_path = watchableData.poster_path;
+        watchable.backdrop_path = watchableData.backdrop_path;
+        jsonSerie.genres?.length > 0
+          ? (watchable.genres = jsonSerie.genres.map((genre: any) =>
+              genresSaved.find((genreAux) => genreAux.external_id === genre.id),
+            ))
+          : '';
+        watchableData.seasons = await this.getSeasonsAndEpisodesNew(
+          watchable,
+          watchableData,
+        );
+        watchable.popularity = jsonSerie.popularity;
+      }
+    }
+  }
+
+  async getSeasonsAndEpisodesNew(watchable: Watchable, dataJson: any) {
+    const seasonsStored: Season[] = await this.seasonsRepository.find({
+      relations: ['episodes'],
+      where: { watchableId: watchable.id },
+    });
+
+    if (dataJson.seasons) {
+      const seasonsToStored: Season[] = [];
+      for await (const season of dataJson?.seasons) {
+        const seasonLocated = seasonsStored?.find(
+          (seasonAux) => seasonAux.external_id === season.id,
+        );
+        if (seasonLocated) {
+          seasonLocated.name = season.name;
+          seasonLocated.overview = season.overview;
+          seasonLocated.poster_path = season.poster_path;
+          seasonLocated.air_date =
+            season.air_date === '' ? null : season.air_date;
+          seasonLocated.episode_count = season.episode_count;
+          seasonLocated.season_number = season.season_number;
+          seasonLocated.vote_average = season.vote_average;
+          seasonLocated.vote_count = season.vote_count;
+          seasonLocated.episodes = await this.getEpisodesNew(
+            watchable.external_id,
+            seasonLocated,
+          );
+          seasonLocated.control = !seasonLocated.control;
+
+          seasonsToStored.push(seasonLocated);
+        } else {
+          const newSeason = new Season();
+          newSeason.name =
+            season.name.length > 250
+              ? season.name.slice(0, 247) + '...'
+              : season.name;
+          newSeason.overview = season.overview;
+          newSeason.poster_path = season.poster_path;
+          newSeason.air_date = season.air_date === '' ? null : season.air_date;
+          newSeason.episode_count = season.episode_count;
+          newSeason.season_number = season.season_number;
+          newSeason.external_id = season.id;
+          newSeason.vote_average = season.vote_average;
+          newSeason.vote_count = season.vote_count;
+          newSeason.episodes = await this.getEpisodesNew(
+            watchable.external_id,
+            newSeason,
+          );
+
+          const createdSeason = this.seasonsRepository.create(newSeason);
+          seasonsToStored.push(createdSeason);
+        }
+      }
+      await this.seasonsRepository.save(seasonsToStored);
+
+      return seasonsToStored;
+    }
+  }
+
+  async getEpisodesNew(
+    watchable_external_id: number,
+    season: Season,
+  ): Promise<Episode[]> {
+    const dataJson: any = await fetch(
+      `https://api.themoviedb.org/3/tv/${watchable_external_id}/season/${season.season_number}?language=es-ES`,
+      this.API_OPTIONS,
+    ).then((res) => res.json());
+
+    if (dataJson?.status_code !== 34) {
+      const episodesToStored: Episode[] = [];
+      if (dataJson?.episodes) {
+        for await (const episode of dataJson?.episodes) {
+          const episodeLocate = season.episodes?.find(
+            (episodeAux) => episodeAux.external_id === episode.id,
+          );
+          if (episodeLocate) {
+            episodeLocate.name = episode.name;
+            episodeLocate.overview = episode.overview;
+            episodeLocate.air_date =
+              episode.air_date === '' ? null : episode.air_date;
+            episodeLocate.episode_number = episode.episode_number;
+            episodeLocate.vote_average = episode.vote_average;
+            episodeLocate.vote_count = episode.vote_count;
+            //episodeLocate.control = !episodeLocate.control;
+
+            episodesToStored.push(episodeLocate);
+          } else {
+            const newEpisode = new Episode();
+            newEpisode.name =
+              episode.name.length > 250
+                ? episode.name.slice(0, 247) + '...'
+                : episode.name;
+            newEpisode.overview = episode.overview;
+            newEpisode.air_date =
+              episode.air_date === '' ? null : episode.air_date;
+            newEpisode.episode_number = episode.episode_number;
+            newEpisode.external_id = episode.id;
+            newEpisode.vote_average = episode.vote_average;
+            newEpisode.vote_count = episode.vote_count;
+
+            const createdEpisode = this.episodesRepository.create(newEpisode);
+            episodesToStored.push(createdEpisode);
+          }
+        }
+        return episodesToStored;
       }
     }
   }

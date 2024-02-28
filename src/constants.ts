@@ -5,4 +5,5 @@ export const constants = {
   WATCH: 'watch',
   EMPTY_MESSAGE: "Don't have new ",
   UPCOMING: 'upcoming',
+  DISCOVER: 'discover',
 };
