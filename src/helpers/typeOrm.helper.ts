@@ -89,5 +89,11 @@ export const getWhere = (filter: Filtering[]) => {
       } else where.push({ [filter.property]: Between(from, to) });
     }
   });
-  return where;
+  let returned = {};
+  where.forEach((whereClause) => {
+    returned = { ...returned, ...whereClause };
+  })
+
+  //return where;
+  return returned;
 }
