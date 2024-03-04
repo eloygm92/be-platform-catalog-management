@@ -2,8 +2,6 @@ import { Injectable } from '@nestjs/common';
 import * as process from 'process';
 import * as dayjs from 'dayjs';
 import { constants } from '../constants';
-import { ProviderService } from '../provider/provider.service';
-import { CreateProviderDto } from '../provider/dto/create-provider.dto';
 import { Repository } from 'typeorm';
 import { Watchable } from '../watchable/entities/watchable.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -15,7 +13,8 @@ import { Episode } from '../episode/entities/episode.entity';
 @Injectable()
 export class ExtractorService {
   constructor(
-    private readonly providerService: ProviderService,
+    @InjectRepository(Provider)
+    private readonly providerRepository: Repository<Provider>,
     @InjectRepository(Watchable)
     private readonly watchableRepository: Repository<Watchable>,
     @InjectRepository(Genre)
@@ -44,68 +43,57 @@ export class ExtractorService {
       `${baseUrl}${constants.MOVIE}?language=${process.env.API_LANG}&watch_region=ES`,
       this.API_OPTIONS,
     );
-    const SetProviders = new Set();
+
+    const providersStored = await this.providerRepository.find();
     if (res.ok) {
-      const jsonMovie = await res.json();
-      jsonMovie.results.forEach((provider) => {
-        SetProviders.add(
-          JSON.stringify({
-            logo_path: provider.logo_path,
-            name: provider.provider_name,
-            external_id: provider.provider_id,
-            type: constants.MOVIE,
-          }),
+      const jsonProvidersMovie: { results: {display_priorities: object, display_priority: object, logo_path: string, provider_name: string, provider_id: number}[] } = await res.json();
+
+      for await (const providerMovie of jsonProvidersMovie.results) {
+        const foundProvider = providersStored.find(
+          (provider) => provider.external_id === providerMovie.provider_id,
         );
-      });
-    } else {
-      throw new Error(res.statusText);
+
+        if (foundProvider) {
+          foundProvider.name = providerMovie.provider_name;
+          foundProvider.logo_path = providerMovie.logo_path;
+        } else {
+          const newProvider = new Provider();
+          newProvider.name = providerMovie.provider_name;
+          newProvider.logo_path = providerMovie.logo_path;
+          newProvider.external_id = providerMovie.provider_id;
+          providersStored.push(this.providerRepository.create(newProvider));
+        }
+      }
+      await this.providerRepository.save(providersStored);
     }
 
     const res2 = await fetch(
       `${baseUrl}${constants.TV}?language=${process.env.API_LANG}&watch_region=ES`,
       this.API_OPTIONS,
     );
+
     if (res2.ok) {
-      const jsonTv = await res2.json();
-      jsonTv.results.forEach((provider) => {
-        SetProviders.add(
-          JSON.stringify({
-            logo_path: provider.logo_path,
-            name: provider.provider_name,
-            external_id: provider.provider_id,
-            type: constants.TV,
-          }),
+      const jsonProvidersTv: { results: {display_priorities: object, display_priority: object, logo_path: string, provider_name: string, provider_id: number}[] } = await res2.json();
+      for await (const providerTv of jsonProvidersTv.results) {
+        const foundProvider = providersStored.find(
+          (provider) => provider.external_id === providerTv.provider_id,
         );
-      });
-    } else {
-      throw new Error(res2.statusText);
+
+        if (foundProvider) {
+          foundProvider.name = providerTv.provider_name;
+          foundProvider.logo_path = providerTv.logo_path;
+        } else {
+          const newProvider = new Provider();
+          newProvider.name = providerTv.provider_name;
+          newProvider.logo_path = providerTv.logo_path;
+          newProvider.external_id = providerTv.provider_id;
+          providersStored.push(this.providerRepository.create(newProvider));
+        }
+      }
+      await this.providerRepository.save(providersStored);
     }
 
-    const setSavedProviders = new Set();
-    const savedProviders = await this.providerService.findAll();
-
-    savedProviders.forEach((provider) => {
-      setSavedProviders.add(
-        JSON.stringify({
-          logo_path: provider.logo_path,
-          name: provider.name,
-          external_id: provider.external_id,
-          type: provider.type,
-        }),
-      );
-    });
-
-    const diffElements = [...SetProviders].filter(
-      (provider) => !setSavedProviders.has(provider),
-    );
-
-    if (diffElements.length > 0) {
-      const dataDto: CreateProviderDto[] = diffElements.map((provider: any) =>
-        JSON.parse(provider),
-      );
-      return await this.providerService.massiveCreate(dataDto);
-    }
-    return { msg: constants.EMPTY_MESSAGE + constants.PROVIDERS };
+    return { msg: constants.FINISHED + ' ' + constants.PROVIDERS };
   }
 
   async getUpcomingMovies() {
@@ -118,7 +106,7 @@ export class ExtractorService {
     if (res.ok) {
       const jsonData = await res.json();
       const genresSaved = await this.genreRepository.find();
-      const providersSaved = await this.providerService.findAll();
+      const providersSaved = await this.providerRepository.find();
       await this.mapperUpcomingMovies(
         jsonData.results,
         genresSaved,
@@ -160,7 +148,7 @@ export class ExtractorService {
       const jsonData = await res.json();
 
       const genresSaved = await this.genreRepository.find();
-      const providersSaved = await this.providerService.findAll();
+      const providersSaved = await this.providerRepository.find();
       await this.mapperAiringTodaySeries(
         jsonData.results,
         genresSaved,
@@ -228,7 +216,7 @@ export class ExtractorService {
             );
           }
           if (watchableData['watch/providers'].results?.ES?.ads?.length > 0) {
-            const providesAux = watchableData.results.ES.ads.map(
+            const providesAux = watchableData['watch/providers'].results.ES.ads.map(
               (provider: any) =>
                 providersSaved.find(
                   (providerAux) =>
@@ -302,7 +290,7 @@ export class ExtractorService {
             );
           }
           if (watchableData['watch/providers'].results?.ES?.ads?.length > 0) {
-            const providesAux = watchableData.results.ES.ads.map(
+            const providesAux = watchableData['watch/providers'].results.ES.ads.map(
               (provider: any) =>
                 providersSaved.find(
                   (providerAux) =>

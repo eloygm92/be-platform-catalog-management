@@ -18,8 +18,8 @@ export class Provider {
   @Column({ length: 50 })
   name: string;
 
-  @Column({ length: 50 })
-  type: string;
+  /*@Column({ length: 50 })
+  type: string;*/
 
   @Column()
   external_id: number;

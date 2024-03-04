@@ -4,6 +4,7 @@ export const constants = {
   TV: 'tv',
   WATCH: 'watch',
   EMPTY_MESSAGE: "Don't have new ",
+  FINISHED: 'Finished',
   UPCOMING: 'upcoming',
   DISCOVER: 'discover',
 };
