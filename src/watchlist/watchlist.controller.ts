@@ -20,9 +20,11 @@ export class WatchlistController {
     return this.watchlistService.create(createWatchlistDto);
   }
 
-  @Get()
-  findAll() {
-    return this.watchlistService.findAll();
+  @Get(':user')
+  findAll(
+    @Param('user') user: string,
+  ) {
+    return this.watchlistService.findAll(+user);
   }
 
   @Get(':id')
@@ -38,8 +40,11 @@ export class WatchlistController {
     return this.watchlistService.update(+id, updateWatchlistDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.watchlistService.remove(+id);
+  @Delete(':user/:watchable')
+  remove(
+    @Param('user') user_id: string,
+    @Param('watchable') watchable_id: string
+  ) {
+    return this.watchlistService.remove(+user_id, +watchable_id);
   }
 }

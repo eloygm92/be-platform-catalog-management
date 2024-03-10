@@ -21,6 +21,12 @@ export class Watchlist {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
+  @Column({ type: 'number', nullable: false, name: 'user_id' })
+  user_id: number;
+
+  @Column({ type: 'number', nullable: false, name: 'watchable_id' })
+  watchable_id: number;
+
   @Column({ type: 'boolean', nullable: false, default: false })
   view: boolean;
 }

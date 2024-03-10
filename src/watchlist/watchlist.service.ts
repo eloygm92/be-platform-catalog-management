@@ -31,9 +31,18 @@ export class WatchlistService {
     return watchlist;
   }
 
-  async findAll() {
+  async findAll(user_id: number) {
     return await this.watchlistRepository.find({
-      relations: ['watchable', 'user'],
+      select: {
+        id: true,
+        watchable_id: true,
+        view: true,
+        watchable: {
+          name: true
+        }
+      },
+      relations: ['watchable'],
+      where: { user: { id: user_id } },
     });
   }
 
@@ -64,7 +73,13 @@ export class WatchlistService {
     return updated.affected === 1 ? await this.findOne(id) : false;
   }
 
-  async remove(id: number) {
-    return await this.watchlistRepository.delete(id);
+  async remove(user_id: number, watchable_id: number) {
+    const watchlist_row = await this.watchlistRepository.findOne({
+      where: {
+        user_id: user_id,
+        watchable_id: watchable_id
+      }
+    })
+    return await this.watchlistRepository.remove(watchlist_row);
   }
 }
