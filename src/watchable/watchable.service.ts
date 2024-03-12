@@ -3,12 +3,12 @@ import { CreateWatchableDto } from './dto/create-watchable.dto';
 import { UpdateWatchableDto } from './dto/update-watchable.dto';
 import { Watchable } from './entities/watchable.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository } from "typeorm";
 import { Provider } from '../provider/entities/provider.entity';
 import { Filtering } from "../helpers/decorators/filtering-params.decorator";
 import { Pagination } from "../helpers/decorators/params-params.decorator";
 import { Sorting } from "../helpers/decorators/sorting-params.decorator";
-import { getOrder, getWhere } from "../helpers/typeOrm.helper";
+import { getOrder, getWhereQB } from "../helpers/typeOrm.helper";
 import { PaginatedResource } from "../helpers/paginatedResource.type";
 import { Genre } from "./entities/genre.entity";
 
@@ -41,16 +41,26 @@ export class WatchableService {
     sort?: Sorting,
     filter?: Filtering[],
   ): Promise<PaginatedResource<Partial<Watchable>>> {
-    const where = getWhere(filter);
+    const where = getWhereQB(filter);
     const order = getOrder(sort);
+    const newOrder: [string, string] | string | any = Object.entries(order)[0];
 
-    const [watchables, total] = await this.watchableRepository.findAndCount({
+    /*const [watchables, total] = await this.watchableRepository.findAndCount({
       //relations: ['genres'],
       where,
       order,
       take: limit,
       skip: offset,
-    });
+    });*/
+    const [watchables, total] = await this.watchableRepository.createQueryBuilder('Watchable')
+      .innerJoin('Watchable.provider', 'provider')
+      .innerJoin('Watchable.genres', 'genres')
+      .where(where.length > 0 ? where[0] : '', where.length > 0 ? where[1] : '')
+      .orderBy(`Watchable.${newOrder[0]}`, newOrder[1].toUpperCase())
+      .take(limit)
+      .skip(offset)
+      .getManyAndCount();
+
     /*const watchables = await this.watchableRepository.find({
       relations: ['genres'],
       where,
