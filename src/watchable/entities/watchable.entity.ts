@@ -50,6 +50,9 @@ export class Watchable {
   @Column({ type: 'varchar', length: 150, nullable: true })
   backdrop_path: string;
 
+  @Column({ type: 'varchar', length: 200, nullable: true })
+  tagline: string;
+
   @ManyToMany(() => Genre, (genre) => genre.watchables)
   genres: Genre[];
 
