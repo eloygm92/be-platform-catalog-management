@@ -9,5 +9,4 @@ COPY nest-cli.json ./
 #RUN npm install -g nest@cli
 RUN npm install
 RUN npm run build
-COPY ./dist .
-CMD ["node", "main.js"]
+CMD ["node", "dist/main"]
