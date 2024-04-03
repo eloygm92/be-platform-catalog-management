@@ -1,6 +1,4 @@
 FROM node:20-alpine as development
-ARG ENVIRONMENT
-
 WORKDIR /usr/src/app
 COPY package*.json ./
 COPY tsconfig*.json ./
@@ -8,7 +6,8 @@ COPY nest-cli.json ./
 #COPY .env.production ./.env
 #RUN npm install -g nest@cli
 RUN npm install
-RUN npm run build
+#RUN npm run build
+COPY ./src ./src
 CMD ["npm", "run", "start:dev"]
 
 FROM development as builder
