@@ -14,11 +14,13 @@ import { Role } from "../user/entities/role.entity";
   imports: [
     TypeOrmModule.forFeature([User, Role]),
     JwtModule.register({
+      global: true,
       secret: process.env.ACCESS_TOKEN_SECRET,
       signOptions: { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION },
     })
   ],
   controllers: [AuthController],
   providers: [AuthService, GoogleStrategy, JwtStrategy, AccessTokenStrategy, RefreshTokenStrategy],
+  exports: [AuthService],
 })
 export class AuthModule {}

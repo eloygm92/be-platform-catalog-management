@@ -9,6 +9,7 @@ import { CreateUserDto } from "../user/dto/create-user.dto";
 import * as bcrypt from 'bcrypt';
 import * as process from "process";
 import { Role } from "../user/entities/role.entity";
+import { JwtPayload } from "./strategies/jwt.strategy";
 
 @Injectable()
 export class AuthService {
@@ -129,6 +130,12 @@ export class AuthService {
     if (!user) return null;
 
     return user;
+  }
+
+  async validateAdminUser(payload: JwtPayload) {
+    const user = await this.userRepository.findOne({ relations: ['role'], where: { id: Number(payload.sub) }});
+    console.log(user, 'user');
+    return user?.role?.name === 'admin';
   }
 
   async refreshToken(refreshToken: string) {
