@@ -6,13 +6,15 @@ import {
   Patch,
   Param,
   Delete,
-} from '@nestjs/common';
+  UseGuards
+} from "@nestjs/common";
 import { WatchableService } from './watchable.service';
 import { CreateWatchableDto } from './dto/create-watchable.dto';
 import { UpdateWatchableDto } from './dto/update-watchable.dto';
 import { Pagination, PaginationParams } from "../helpers/decorators/params-params.decorator";
 import { Sorting, SortingParams } from "../helpers/decorators/sorting-params.decorator";
 import { Filtering, FilteringParams } from "../helpers/decorators/filtering-params.decorator";
+import { AdminUseGuard } from "../auth/guards/adminUse.guard";
 
 @Controller('watchable')
 export class WatchableController {
@@ -68,21 +70,25 @@ export class WatchableController {
     return this.watchableService.findOne(+id);
   }
 
+  @UseGuards(AdminUseGuard)
   @Get('deactivate/:id')
   deactivate(@Param('id') id: number) {
     return this.watchableService.deactivate(id);
   }
 
+  @UseGuards(AdminUseGuard)
   @Get('restore/:id')
   restore(@Param('id') id: number) {
     return this.watchableService.restore(id);
   }
 
+  @UseGuards(AdminUseGuard)
   @Patch(':id')
   update(@Param('id') id: number, @Body() updateMovieDto: UpdateWatchableDto) {
     return this.watchableService.update(+id, updateMovieDto);
   }
 
+  @UseGuards(AdminUseGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.watchableService.remove(+id);

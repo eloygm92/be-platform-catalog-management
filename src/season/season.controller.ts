@@ -5,11 +5,12 @@ import {
   Body,
   Patch,
   Param,
-  Delete,
-} from '@nestjs/common';
+  Delete, UseGuards
+} from "@nestjs/common";
 import { SeasonService } from './season.service';
 import { CreateSeasonDto } from './dto/create-season.dto';
 import { UpdateSeasonDto } from './dto/update-season.dto';
+import { AdminUseGuard } from "../auth/guards/adminUse.guard";
 
 @Controller('season')
 export class SeasonController {
@@ -30,11 +31,13 @@ export class SeasonController {
     return this.seasonService.findOne(+id);
   }
 
+  @UseGuards(AdminUseGuard)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateSeasonDto: UpdateSeasonDto) {
     return this.seasonService.update(+id, updateSeasonDto);
   }
 
+  @UseGuards(AdminUseGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.seasonService.remove(+id);

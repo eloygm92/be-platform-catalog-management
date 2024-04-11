@@ -5,11 +5,12 @@ import {
   Body,
   Patch,
   Param,
-  Delete,
-} from '@nestjs/common';
+  Delete, UseGuards
+} from "@nestjs/common";
 import { ProviderService } from './provider.service';
 import { CreateProviderDto } from './dto/create-provider.dto';
 import { UpdateProviderDto } from './dto/update-provider.dto';
+import { AdminUseGuard } from "../auth/guards/adminUse.guard";
 
 @Controller('provider')
 export class ProviderController {
@@ -30,6 +31,7 @@ export class ProviderController {
     return this.providerService.findOne(id);
   }
 
+  @UseGuards(AdminUseGuard)
   @Patch(':id')
   update(
     @Param('id') id: number,
@@ -38,6 +40,7 @@ export class ProviderController {
     return this.providerService.update(id, updateProviderDto);
   }
 
+  @UseGuards(AdminUseGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.providerService.remove(+id);
