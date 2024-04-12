@@ -134,7 +134,7 @@ export class AuthService {
 
   async validateAdminUser(payload: JwtPayload) {
     const user = await this.userRepository.findOne({ relations: ['role'], where: { id: Number(payload.sub) }});
-    console.log(user, 'user');
+
     return user?.role?.name === 'admin';
   }
 

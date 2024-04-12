@@ -6,6 +6,7 @@ import { CreateUserDto } from "../user/dto/create-user.dto";
 import { AuthDto } from "./dto/create-auth.dto";
 import { Request } from 'express';
 import * as process from "process";
+import { RefreshTokenGuard } from "./guards/refreshToken.guard";
 
 @Controller('auth')
 export class AuthController {
@@ -81,6 +82,7 @@ export class AuthController {
     return res.status(HttpStatus.OK);
   }
 
+  @UseGuards(RefreshTokenGuard)
   @Get('refresh')
   async refresh(@Req() req: Request, @Res() res: Response) {
     const { accessToken } = await this.authService.refreshToken(req.cookies['refresh_token']);
