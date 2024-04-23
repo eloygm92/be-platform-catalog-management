@@ -4,6 +4,11 @@ import { UpdateProviderDto } from './dto/update-provider.dto';
 import { Provider } from './entities/provider.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { Pagination } from "../helpers/decorators/params-params.decorator";
+import { Sorting } from "../helpers/decorators/sorting-params.decorator";
+import { Filtering } from "../helpers/decorators/filtering-params.decorator";
+import { PaginatedResource } from "../helpers/paginatedResource.type";
+import { getOrder, getWhere } from "../helpers/typeOrm.helper";
 
 @Injectable()
 export class ProviderService {
@@ -26,12 +31,35 @@ export class ProviderService {
     await this.providerRepository.save(createdProviders);
     return createdProviders;
   }
-  async findAll() {
-    return await this.providerRepository.find();
+  async findAll(
+    { page, limit, size, offset }: Pagination,
+    sort?: Sorting,
+    filter?: Filtering[],
+  ): Promise<PaginatedResource<Partial<Provider>>> {
+    const where = getWhere(filter);
+    const order = getOrder(sort);
+
+    const [providers, total] = await this.providerRepository.findAndCount({
+      where,
+      order,
+      take: limit,
+      skip: offset,
+    });
+
+    return {
+      totalItems: total,
+      items: providers,
+      page: (page + 1),
+      size: size,
+    }
   }
 
   async findOne(id: number) {
     return await this.providerRepository.findOneBy({ id });
+  }
+
+  async findProvidersByWatchableId(id: number) {
+    return await this.providerRepository.find({ relations: ['watchables'], where: { watchables: { id } } });
   }
 
   async update(id: number, updateProviderDto: UpdateProviderDto) {

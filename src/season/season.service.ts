@@ -36,6 +36,10 @@ export class SeasonService {
     return await this.seasonRepository.findOneByOrFail({ id });
   }
 
+  async findSeasonsByWatchableId(watchable_id: number) {
+    return await this.seasonRepository.find({ relations: ['episodes'], where: { watchableId: watchable_id } });
+  }
+
   async update(id: number, updateSeasonDto: UpdateSeasonDto) {
     const { watchable, ...updateSeasonDataDto } = updateSeasonDto;
 

@@ -11,6 +11,9 @@ import { ProviderService } from './provider.service';
 import { CreateProviderDto } from './dto/create-provider.dto';
 import { UpdateProviderDto } from './dto/update-provider.dto';
 import { AdminUseGuard } from "../auth/guards/adminUse.guard";
+import { Pagination, PaginationParams } from "../helpers/decorators/params-params.decorator";
+import { Sorting, SortingParams } from "../helpers/decorators/sorting-params.decorator";
+import { Filtering, FilteringParams } from "../helpers/decorators/filtering-params.decorator";
 
 @Controller('provider')
 export class ProviderController {
@@ -22,13 +25,22 @@ export class ProviderController {
   }
 
   @Get()
-  findAll() {
-    return this.providerService.findAll();
+  findAll(
+    @PaginationParams() paginationParams: Pagination,
+    @SortingParams() sort?: Sorting,
+    @FilteringParams() filter?: Filtering[],
+  ) {
+    return this.providerService.findAll(paginationParams, sort, filter);
   }
 
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.providerService.findOne(id);
+  }
+
+  @Get('watchable/:id')
+  findProvidersByWatchableId(@Param('id') id: number) {
+    return this.providerService.findProvidersByWatchableId(id);
   }
 
   @UseGuards(AdminUseGuard)

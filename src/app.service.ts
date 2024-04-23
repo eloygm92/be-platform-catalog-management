@@ -106,6 +106,7 @@ export class AppService {
           watchableData.vote_count = dataJson.vote_count;
           watchableData.poster_path = dataJson.poster_path;
           watchableData.backdrop_path = dataJson.backdrop_path;
+          watchableData.tagline = dataJson.tagline;
           dataJson.genres?.length > 0
             ? (watchable.genres = dataJson.genres.map((genre: any) =>
                 genres.find((genreAux) => genreAux.external_id === genre.id),
@@ -298,6 +299,7 @@ export class AppService {
             watchableData.vote_count = dataJson.vote_count;
             watchableData.poster_path = dataJson.poster_path;
             watchableData.backdrop_path = dataJson.backdrop_path;
+            watchableData.tagline = dataJson.tagline;
             dataJson.genres?.length > 0
               ? (watchable.genres = dataJson.genres.map((genre) =>
                   genres.find((genreAux) => genreAux.external_id === genre.id),

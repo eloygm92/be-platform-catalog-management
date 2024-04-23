@@ -26,6 +26,11 @@ export class SeasonController {
     return this.seasonService.findAll();
   }
 
+  @Get('watchable/:watchable_id')
+  findSeasonsByWatchableId(@Param('watchable_id') watchable_id: number) {
+    return this.seasonService.findSeasonsByWatchableId(watchable_id);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.seasonService.findOne(+id);
