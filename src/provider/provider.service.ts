@@ -54,6 +54,10 @@ export class ProviderService {
     }
   }
 
+  async findAllSelect() {
+    return await this.providerRepository.find();
+  }
+
   async findOne(id: number) {
     return await this.providerRepository.findOneBy({ id });
   }

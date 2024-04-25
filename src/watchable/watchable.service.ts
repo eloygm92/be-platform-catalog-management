@@ -53,16 +53,20 @@ export class WatchableService {
       skip: offset,
     });*/
     const qb = this.watchableRepository.createQueryBuilder('Watchable')
-      .innerJoin('Watchable.provider', 'provider')
-      .innerJoin('Watchable.genres', 'genres')
-      .where(where.length > 0 ? where[0] : '', where.length > 0 ? where[1] : '')
-      .take(limit)
-      .skip(offset);
+      .innerJoin("Watchable.provider", "provider");
+
+    if (where.length > 0 && Object.getOwnPropertyNames(where[1]).includes('genres'))
+      qb.innerJoin("Watchable.genres", "genres");
 
     if (newOrder)
       qb.orderBy(`Watchable.${newOrder[0]}`, newOrder[1].toUpperCase());
 
-    const [watchables, total] = await qb.getManyAndCount();
+
+    const [watchables, total] = await qb
+      .where(where.length > 0 ? where[0] : '', where.length > 0 ? where[1] : '')
+      .take(limit)
+      .skip(offset)
+      .getManyAndCount();
 
     /*const watchables = await this.watchableRepository.find({
       relations: ['genres'],

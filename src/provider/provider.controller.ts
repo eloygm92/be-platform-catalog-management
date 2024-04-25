@@ -28,9 +28,14 @@ export class ProviderController {
   findAll(
     @PaginationParams() paginationParams: Pagination,
     @SortingParams() sort?: Sorting,
-    @FilteringParams() filter?: Filtering[],
+    @FilteringParams(['name']) filter?: Filtering[],
   ) {
     return this.providerService.findAll(paginationParams, sort, filter);
+  }
+
+  @Get('select')
+  findAllSelect() {
+    return this.providerService.findAllSelect();
   }
 
   @Get(':id')
