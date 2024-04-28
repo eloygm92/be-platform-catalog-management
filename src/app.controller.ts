@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Patch } from '@nestjs/common';
 import { AppService } from './app.service';
 
 @Controller()
@@ -15,5 +15,18 @@ export class AppController {
   getSyncroTv(@Param('id') id?: number): Promise<any> {
     //return this.appService.handleTaskWatchableTv();
     return this.appService.handleTaskTv(id);
+  }
+
+  @Get('config')
+  getConfig(): Promise<any> {
+    return this.appService.getConfig();
+  }
+
+  @Patch('config/:name/:value')
+  setConfig(
+    @Param('name') name: string,
+    @Param('value') value: number,
+  ): Promise<any> {
+    return this.appService.setConfig(name, value);
   }
 }

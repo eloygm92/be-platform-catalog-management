@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { Watchable } from './watchable/entities/watchable.entity';
 import { Genre } from './watchable/entities/genre.entity';
 import { Interval } from '@nestjs/schedule';
@@ -21,6 +21,7 @@ export class AppService {
     private readonly seasonsRepository: Repository<Season>,
     @InjectRepository(Episode)
     private readonly episodesRepository: Repository<Episode>,
+    private readonly entityManager: EntityManager,
   ) {
     this.API_OPTIONS = {
       method: 'GET',
@@ -35,6 +36,12 @@ export class AppService {
 
   //@Interval(4000)
   async handleTaskMovie(watchableId?: number | undefined) {
+    const tryQuery = Boolean(
+      await this.entityManager.query(
+        "SELECT value_status FROM configuration WHERE name = 'news_movies'",
+      ),
+    );
+    if (!tryQuery) return { message: 'No se puede realizar la consulta' };
     let watchablesToFetch: Watchable[] = [];
     if (watchableId) {
       watchablesToFetch = await this.watchableRepository.find({
@@ -226,6 +233,14 @@ export class AppService {
 
   //@Interval(10000)
   async handleTaskTv(watchableId?: number | undefined) {
+    const tryQuery = Boolean(
+      await this.entityManager.query(
+        "SELECT value_status FROM configuration WHERE name = 'new_tvs'",
+      ),
+    );
+
+    if (!tryQuery) return { message: 'No se puede realizar la consulta' };
+
     let watchablesToFetch: Watchable[] = [];
     if (watchableId) {
       watchablesToFetch = await this.watchableRepository.find({
@@ -427,5 +442,19 @@ export class AppService {
         return episodesToStored;
       }
     }
+  }
+
+  async getConfig() {
+    return await this.entityManager.query('SELECT * FROM configuration');
+  }
+
+  async setConfig(name: string, value: number) {
+    const returned = await this.entityManager.query(
+      `UPDATE configuration SET value_status = '${value}' WHERE name = '${name}'`,
+    );
+
+    if (returned.affectedRows > 0)
+      return { message: 'Configuración actualizada' };
+    return { message: 'No se pudo actualizar la configuración' };
   }
 }
