@@ -150,14 +150,16 @@ export const getWhereQB = (filter: Filtering[]) => {
     if (filter.rule == FilterRule.LIKE) {
       if (filter.property.includes('.')) {
         const [entity, property] = filter.property.split('.');
-        where.push([ `${filter.property} ILIKE :%${entity}%`, { [entity]: filter.value } ]);
-      } else where.push([ `${filter.property} ILIKE :%${filter.property}%`, { [filter.property]: filter.value } ]);
+        where.push([ `${filter.property} LIKE :${entity}`, { [entity]: '%'+filter.value+'%' } ]);
+      } else {
+        where.push([`${filter.property} LIKE :${filter.property}`, { [filter.property]: '%'+filter.value+'%' }]);
+      }
     }
     if (filter.rule == FilterRule.NOT_LIKE) {
       if (filter.property.includes('.')) {
         const [entity, property] = filter.property.split('.');
-        where.push([ `${filter.property} NOT ILIKE :%${entity}%`, { [entity]: filter.value } ]);
-      } else where.push([ `${filter.property} NOT ILIKE :%${filter.property}%`, { [filter.property]: filter.value } ]);
+        where.push([ `${filter.property} NOT LIKE :${entity}`, { [entity]: '%'+filter.value+'%' } ]);
+      } else where.push([ `${filter.property} NOT LIKE :${filter.property}`, { [filter.property]: '%'+filter.value+'%' } ]);
     }
     if (filter.rule == FilterRule.IN) {
       if (filter.property.includes('.')) {

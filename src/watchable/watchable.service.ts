@@ -3,7 +3,7 @@ import { CreateWatchableDto } from './dto/create-watchable.dto';
 import { UpdateWatchableDto } from './dto/update-watchable.dto';
 import { Watchable } from './entities/watchable.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from "typeorm";
+import { Like, Repository } from "typeorm";
 import { Provider } from '../provider/entities/provider.entity';
 import { Filtering } from "../helpers/decorators/filtering-params.decorator";
 import { Pagination } from "../helpers/decorators/params-params.decorator";
@@ -52,14 +52,14 @@ export class WatchableService {
       take: limit,
       skip: offset,
     });*/
-    const qb = this.watchableRepository.createQueryBuilder('Watchable')
-      .innerJoin("Watchable.provider", "provider");
+    const qb = this.watchableRepository.createQueryBuilder('watchable')
+      .innerJoin("watchable.provider", "provider");
 
     if (where.length > 0 && Object.getOwnPropertyNames(where[1]).includes('genres'))
-      qb.innerJoin("Watchable.genres", "genres");
+      qb.innerJoin("watchable.genres", "genres");
 
     if (newOrder)
-      qb.orderBy(`Watchable.${newOrder[0]}`, newOrder[1].toUpperCase());
+      qb.orderBy(`watchable.${newOrder[0]}`, newOrder[1].toUpperCase());
 
 
     const [watchables, total] = await qb
@@ -92,6 +92,14 @@ export class WatchableService {
 
   async getGenres() {
     return await this.genresRepository.find();
+  }
+
+  async findAllSelect(search: string) {
+    return await this.watchableRepository.find({
+      where:
+        { name: Like('%'+search+'%') },
+      take: 40
+    });
   }
 
   async update(id: number, updateWatchableDto: UpdateWatchableDto) {
