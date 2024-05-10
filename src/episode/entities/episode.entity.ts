@@ -15,7 +15,6 @@ export class Episode {
   id: number;
 
   @ManyToOne(() => Season, (season) => season.episodes, {
-    cascade: true,
     orphanedRowAction: 'delete',
   })
   @JoinColumn({ name: 'season_id' })
