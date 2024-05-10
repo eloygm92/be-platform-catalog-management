@@ -90,7 +90,13 @@ export class UserService {
     const userToSave = Object.assign(userStored, { ...updateUserDto });
 
     //return await this.userRepository.update(id, { ...updateUserDto, role: role });
-    return await this.userRepository.save(userToSave);
+    await this.userRepository.save(userToSave);
+    const userStoredAfterSave = await this.userRepository.findOne({
+      relations: ['role', 'providers'],
+      where: { id: id },
+    });
+
+    return { id: userStoredAfterSave.id, username: userStoredAfterSave.username, email: userStoredAfterSave.email, providers: userStoredAfterSave.providers, role: userStoredAfterSave.role.name }
   }
 
   remove(id: number) {

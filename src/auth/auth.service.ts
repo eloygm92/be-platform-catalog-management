@@ -10,6 +10,7 @@ import * as bcrypt from 'bcrypt';
 import * as process from "process";
 import { Role } from "../user/entities/role.entity";
 import { JwtPayload } from "./strategies/jwt.strategy";
+import { sendCreatedUser } from "../helpers/sendgrid.helper";
 
 @Injectable()
 export class AuthService {
@@ -37,13 +38,21 @@ export class AuthService {
 
     const tokens = await this.getTokens(newUser.id, newUser.username);
     await this.updateRefreshToken(newUser.id, tokens.refreshToken);
+    const returnedData: any = { tokens: tokens, user: { id: newUser.id, username: newUser.username, email: newUser.email  } };
 
-    return { tokens: tokens, user: { id: newUser.id, username: newUser.username, email: newUser.email  } };
+    if(newUser.providers.length > 0) {
+      const createdUser = await this.userRepository.findOne({where: {id: newUser.id}, relations: ['providers']});
+      returnedData.user.providers = createdUser.providers;
+    }
+
+    await sendCreatedUser(newUser.email, newUser.username);
+
+    return returnedData;
   }
 
   async signIn(data: AuthDto) {
     const user = await this.userRepository.findOne({
-      relations: ['role'],
+      relations: ['role', 'providers'],
       where: [{ username: data.username }, { deactivate_at: null }],
   });
 
@@ -56,7 +65,7 @@ export class AuthService {
     const tokens = await this.getTokens(user.id, user.username);
     await this.updateRefreshToken(user.id, tokens.refreshToken);
 
-    return { tokens: tokens, user: { id: user.id, username: user.username, email: user.email, role: user.role.name  } };
+    return { tokens: tokens, user: { id: user.id, username: user.username, email: user.email, role: user.role.name, providers: user.providers  } };
   }
 
   async logout(userId: number | string) {
