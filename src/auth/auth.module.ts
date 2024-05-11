@@ -9,6 +9,7 @@ import { JwtStrategy } from "./strategies/jwt.strategy";
 import { AccessTokenStrategy } from "./strategies/accessToken.strategy";
 import { RefreshTokenStrategy } from "./strategies/refreshToken.strategy";
 import { Role } from "../user/entities/role.entity";
+import { ChangePasswordStrategy } from "./strategies/changePassword.strategy";
 
 @Module({
   imports: [
@@ -20,7 +21,7 @@ import { Role } from "../user/entities/role.entity";
     })
   ],
   controllers: [AuthController],
-  providers: [AuthService, GoogleStrategy, JwtStrategy, AccessTokenStrategy, RefreshTokenStrategy],
+  providers: [AuthService, GoogleStrategy, JwtStrategy, AccessTokenStrategy, RefreshTokenStrategy, ChangePasswordStrategy],
   exports: [AuthService],
 })
 export class AuthModule {}

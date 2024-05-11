@@ -10,7 +10,7 @@ import * as bcrypt from 'bcrypt';
 import * as process from "process";
 import { Role } from "../user/entities/role.entity";
 import { JwtPayload } from "./strategies/jwt.strategy";
-import { sendCreatedUser } from "../helpers/sendgrid.helper";
+import { sendChangePassword, sendCreatedUser } from "../helpers/sendgrid.helper";
 
 @Injectable()
 export class AuthService {
@@ -161,5 +161,32 @@ export class AuthService {
     const accessToken = await this.jwtService.signAsync(payload, { secret: process.env.ACCESS_TOKEN_SECRET, expiresIn: process.env.ACCESS_TOKEN_EXPIRATION });
 
     return { accessToken };
+  }
+
+  async generateChangeMail(email: string) {
+    const user = await this.userRepository.findOne({where: {email: email}});
+
+    if (!user) throw new BadRequestException('User does not exist');
+
+    const token = await this.jwtService.signAsync({ sub: user.id, email: user.email }, { secret: process.env.CHANGE_PASSWORD_SECRET, expiresIn: process.env.CHANGE_PASSWORD_EXPIRATION });
+
+    await sendChangePassword(email, user.username, token);
+
+    return { token };
+  }
+
+  async changePassword(changeData: { token: string, password: string }) {
+    const decodeToken = await this.jwtService.verifyAsync(changeData.token, { secret: process.env.CHANGE_PASSWORD_SECRET });
+
+    if (!decodeToken) throw new BadRequestException('Invalid token');
+
+    const user = await this.userRepository.findOne({where: {email: decodeToken['email']}});
+
+    if (!user) throw new BadRequestException('User does not exist');
+
+    user.password = await this.hashData(changeData.password);
+    await this.userRepository.save(user);
+
+    return { message: 'Password changed successfully' };
   }
 }

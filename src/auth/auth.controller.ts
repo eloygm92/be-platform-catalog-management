@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Res, Req, HttpStatus, Post, Body } from "@nestjs/common";
+import { Controller, Get, UseGuards, Res, Req, HttpStatus, Post, Body, Patch } from "@nestjs/common";
 import { AuthService } from './auth.service';
 import { Response } from 'express'
 import { GoogleOauthGuard } from "./guards/google-oauth.guard";
@@ -7,6 +7,7 @@ import { AuthDto } from "./dto/create-auth.dto";
 import { Request } from 'express';
 import * as process from "process";
 import { RefreshTokenGuard } from "./guards/refreshToken.guard";
+import { ChangePasswordGuard } from "./guards/changePassword.guard";
 
 @Controller('auth')
 export class AuthController {
@@ -94,5 +95,17 @@ export class AuthController {
     })
 
     return res.status(HttpStatus.OK).json({ accessToken });
+  }
+
+  @Post('forgot-password')
+  async changeChangeMail(@Body() emailData: { email: string}) {
+    return this.authService.generateChangeMail(emailData.email);
+  }
+
+
+  @Patch('change-password')
+  @UseGuards(ChangePasswordGuard)
+  async changePassword(@Body() changeData: { password: string, token: string}) {
+    return this.authService.changePassword(changeData);
   }
 }
