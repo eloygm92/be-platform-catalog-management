@@ -17,4 +17,7 @@ export class CreateUserDto {
 
   @IsOptional()
   providers: Provider[];
+
+  @IsOptional()
+  avatar_img: string;
 }

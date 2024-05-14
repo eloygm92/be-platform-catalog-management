@@ -63,4 +63,7 @@ export class User {
     inverseJoinColumn: { name: 'provider_id', referencedColumnName: 'id' },
   })
   providers: Provider[];
+
+  @Column({ type: 'text', name: 'avatar_img', nullable: true })
+  avatar_img: string;
 }

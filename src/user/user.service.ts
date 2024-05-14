@@ -96,7 +96,7 @@ export class UserService {
       where: { id: id },
     });
 
-    return { id: userStoredAfterSave.id, username: userStoredAfterSave.username, email: userStoredAfterSave.email, providers: userStoredAfterSave.providers, role: userStoredAfterSave.role.name }
+    return { id: userStoredAfterSave.id, username: userStoredAfterSave.username, email: userStoredAfterSave.email, providers: userStoredAfterSave.providers, role: userStoredAfterSave.role.name, avatar_img: userStoredAfterSave.avatar_img }
   }
 
   remove(id: number) {

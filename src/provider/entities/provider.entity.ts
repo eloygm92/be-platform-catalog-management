@@ -53,6 +53,8 @@ export class Provider {
   })
   watchables: Watchable[];
 
-  @ManyToMany(() => User, (user) => user.providers)
+  @ManyToMany(() => User, (user) => user.providers, {
+    orphanedRowAction: 'delete',
+  })
   users: User[];
 }

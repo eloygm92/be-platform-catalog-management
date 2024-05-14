@@ -38,7 +38,7 @@ export class AuthService {
 
     const tokens = await this.getTokens(newUser.id, newUser.username);
     await this.updateRefreshToken(newUser.id, tokens.refreshToken);
-    const returnedData: any = { tokens: tokens, user: { id: newUser.id, username: newUser.username, email: newUser.email  } };
+    const returnedData: any = { tokens: tokens, user: { id: newUser.id, username: newUser.username, email: newUser.email, avatar_img: newUser.avatar_img  } };
 
     if(newUser.providers.length > 0) {
       const createdUser = await this.userRepository.findOne({where: {id: newUser.id}, relations: ['providers']});
@@ -65,7 +65,7 @@ export class AuthService {
     const tokens = await this.getTokens(user.id, user.username);
     await this.updateRefreshToken(user.id, tokens.refreshToken);
 
-    return { tokens: tokens, user: { id: user.id, username: user.username, email: user.email, role: user.role.name, providers: user.providers  } };
+    return { tokens: tokens, user: { id: user.id, username: user.username, email: user.email, role: user.role.name, providers: user.providers, avatar_img: user.avatar_img  } };
   }
 
   async logout(userId: number | string) {
