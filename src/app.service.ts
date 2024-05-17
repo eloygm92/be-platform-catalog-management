@@ -448,6 +448,12 @@ export class AppService {
     return await this.entityManager.query('SELECT * FROM configuration');
   }
 
+  async getConfigByName(name: string) {
+    return await this.entityManager.query(
+      `SELECT value_status FROM configuration WHERE name = '${name}'`,
+    );
+  }
+
   async setConfig(name: string, value: number) {
     const returned = await this.entityManager.query(
       `UPDATE configuration SET value_status = '${value}' WHERE name = '${name}'`,

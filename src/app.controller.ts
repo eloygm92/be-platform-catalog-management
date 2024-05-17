@@ -22,6 +22,11 @@ export class AppController {
     return this.appService.getConfig();
   }
 
+  @Get('config/:name')
+  getConfigByName(@Param('name') name: string): Promise<any> {
+    return this.appService.getConfigByName(name);
+  }
+
   @Patch('config/:name/:value')
   setConfig(
     @Param('name') name: string,
