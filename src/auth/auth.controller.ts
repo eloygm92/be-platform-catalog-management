@@ -44,13 +44,13 @@ export class AuthController {
 
     res.cookie('access_token', dataLogin['tokens']['accessToken'], {
       maxAge: Number((process.env.ACCESS_TOKEN_EXPIRATION).slice(0,-1)) * 1000,
-      sameSite: 'none',
+      //sameSite: 'none',
       secure: true,
     })
 
     res.cookie('refresh_token', dataLogin['tokens']['refreshToken'], {
       maxAge: Number((process.env.REFRESH_TOKEN_EXPIRATION).slice(0,-1)) * 1000 * 60 * 60 * 24,
-      sameSite: 'none',
+      //sameSite: 'none',
       secure: true,
     })
 
