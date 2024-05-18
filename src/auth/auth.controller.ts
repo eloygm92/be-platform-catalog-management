@@ -22,13 +22,13 @@ export class AuthController {
 
     res.cookie('access_token', data['tokens']['accessToken'], {
       maxAge: Number((process.env.ACCESS_TOKEN_EXPIRATION).slice(0,-1)) * 1000,
-      sameSite: 'none',
+      sameSite: 'strict',
       secure: true,
     })
 
     res.cookie('refresh_token', data['tokens']['refreshToken'], {
       maxAge: Number((process.env.REFRESH_TOKEN_EXPIRATION).slice(0,-1)) * 1000 * 60 * 60 * 24,
-      sameSite: 'none',
+      sameSite: 'strict',
       secure: true,
     })
 
@@ -76,7 +76,7 @@ export class AuthController {
 
     res.cookie('access_token', token, {
       maxAge: 2592000000,
-      sameSite: 'none',
+      sameSite: 'strict',
       secure: true,
     });
 
@@ -90,7 +90,7 @@ export class AuthController {
 
     res.cookie('access_token', accessToken, {
       maxAge: Number((process.env.ACCESS_TOKEN_EXPIRATION).slice(0,-1)) * 1000,
-      sameSite: 'none',
+      sameSite: 'strict',
       secure: true,
     })
 
