@@ -38,7 +38,7 @@ export class ExtractorService {
   private readonly API_OPTIONS: object;
 
   async getProviders() {
-    const tryQuery = this.checkItsPossibleToQuery();
+    const tryQuery = await this.checkItsPossibleToQuery();
     if (!tryQuery) return { message: 'No se puede realizar la consulta' };
     const baseUrl = `${process.env.API_URL}/${constants.WATCH}/${constants.PROVIDERS}/`;
 
@@ -100,7 +100,7 @@ export class ExtractorService {
   }
 
   async getUpcomingMovies() {
-    const tryQuery = this.checkItsPossibleToQuery();
+    const tryQuery = await this.checkItsPossibleToQuery();
     if (!tryQuery) return { message: 'No se puede realizar la consulta' };
     const baseUrl = `${process.env.API_URL}/${constants.MOVIE}/${constants.UPCOMING}`;
 
@@ -136,7 +136,11 @@ export class ExtractorService {
   }
 
   async getAiringTodaySeries() {
-    const tryQuery = this.checkItsPossibleToQuery();
+    const tryQuery = Boolean(
+      await this.entityManager.query(
+        "SELECT value_status FROM configuration WHERE name = 'load_news'",
+      ),
+    );
     if (!tryQuery) return { message: 'No se puede realizar la consulta' };
     const baseUrl = `${process.env.API_URL}/${constants.DISCOVER}/${constants.TV}`;
     const currentDate = dayjs();
@@ -443,8 +447,10 @@ export class ExtractorService {
   }
 
   async checkItsPossibleToQuery() {
-    return Boolean(await this.entityManager.query(
-      "SELECT value_status FROM configuration WHERE name = 'load_news'"
-    ));
+    return Boolean(
+      await this.entityManager.query(
+        "SELECT value_status FROM configuration WHERE name = 'load_news'",
+      ),
+    );
   }
 }
