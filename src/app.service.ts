@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import { Watchable } from './watchable/entities/watchable.entity';
 import { Genre } from './watchable/entities/genre.entity';
-import { Interval } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
 import { Provider } from './provider/entities/provider.entity';
 import { Season } from './season/entities/season.entity';
 import { Episode } from './episode/entities/episode.entity';
@@ -33,6 +33,25 @@ export class AppService {
     };
   }
   private API_OPTIONS: object;
+
+  @Cron('* */2 * * * *')
+  async taskUpdate() {
+    const idsToUpdated = await this.watchableRepository.find({
+      select: ['id', 'type'],
+      order: { updated_at: 'ASC' },
+      take: 10,
+    });
+
+    if (idsToUpdated.length > 0) {
+      for await (const watchable of idsToUpdated) {
+        if (watchable.type === 'tv') {
+          await this.handleTaskTv(watchable.id);
+        } else {
+          await this.handleTaskMovie(watchable.id);
+        }
+      }
+    }
+  }
 
   //@Interval(4000)
   async handleTaskMovie(watchableId?: number | undefined) {
@@ -127,109 +146,6 @@ export class AppService {
       return watchablesToFetch;
     }
   }
-
-  //@Interval(10000)
-  /*async handleTaskWatchableTv() {
-    const watchablesToFetch = await this.watchableRepository.find({
-      relations: ['seasons', 'provider'],
-      where: { type: 'tv' },
-      //where: { id: 936622 },
-      order: { updated_at: 'ASC' },
-      take: 20,
-    });
-    let forSaved: Season[] = [];
-    if (watchablesToFetch) {
-      const genres = await this.genreRepository.find();
-      const providers = await this.providersRepository.find();
-      watchablesToFetch.forEach((watchable) => {
-        fetch(
-          `https://api.themoviedb.org/3/tv/${watchable.external_id}?language=es-ES`,
-          this.API_OPTIONS,
-        )
-          .then((res) => res.json())
-          .then(async (dataJson) => {
-            if (dataJson.status_code === 34) {
-              watchable.popularity = 0;
-              watchable.name = watchable.original_name;
-              watchable.overview = '';
-            } else {
-              const providersData = await fetch(
-                `https://api.themoviedb.org/3/tv/${watchable.external_id}/watch/providers`,
-                this.API_OPTIONS,
-              )
-                .then((res) => res.json())
-                .then((dataJson) => {
-                  return dataJson.results;
-                });
-              if (providersData?.ES) {
-                if (providersData.ES.flatrate?.length > 0) {
-                  watchable.provider = providersData.ES.flatrate.map(
-                    (provider: any) =>
-                      providers.find(
-                        (providerAux) =>
-                          providerAux.external_id === provider.provider_id,
-                      ),
-                  );
-                }
-                if (providersData?.ES?.ads?.length > 0) {
-                  const providesAux = providersData.ES.ads.map(
-                    (provider: any) =>
-                      providers.find(
-                        (providerAux) =>
-                          providerAux.external_id === provider.provider_id,
-                      ),
-                  );
-                  watchable.provider =
-                    watchable.provider?.length > 0
-                      ? [...watchable.provider, ...providesAux]
-                      : providesAux;
-                }
-              }
-              watchable.name = dataJson.name;
-              watchable.overview = dataJson.overview;
-              watchable.release_date =
-                dataJson.first_air_date === '' ? null : dataJson.first_air_date;
-              watchable.vote_average = dataJson.vote_average;
-              watchable.vote_count = dataJson.vote_count;
-              watchable.poster_path = dataJson.poster_path;
-              dataJson.genres?.length > 0
-                ? (watchable.genres = dataJson.genres.map((genre) =>
-                    genres.find(
-                      (genreAux) => genreAux.external_id === genre.id,
-                    ),
-                  ))
-                : '';
-              watchable.popularity = dataJson.popularity;
-              /!*watchable.seasons = await this.getSeasonsAndEpisodes(
-                watchable,
-                dataJson,
-              );*!/
-              /!*const { seas, seasSaved } = await this.getSeasonsAndEpisodes(
-                watchable,
-                dataJson,
-              );
-              console.log(seasSaved, 'seasSaved');
-              watchable.seasons = seasSaved;*!/
-              watchable.seasons = await this.getSeasonsAndEpisodes(
-                watchable,
-                dataJson,
-              );
-              /!*watchable.seasons = seas;
-              forSaved = seasSaved;*!/
-            }
-            watchable.control = !watchable.control;
-            await this.watchableRepository.save(watchable);
-
-            /!*if (forSaved.length > 0)
-              await this.seasonsRepository.save(forSaved);*!/
-
-            //return watchable;
-          })
-          .catch((err) => console.log(err));
-      });
-    }
-    return watchablesToFetch;
-  }*/
 
   //@Interval(10000)
   async handleTaskTv(watchableId?: number | undefined) {

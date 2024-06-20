@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import * as process from 'process';
 import * as dayjs from 'dayjs';
 import { constants } from '../constants';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from "typeorm";
 import { Watchable } from '../watchable/entities/watchable.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Genre } from '../watchable/entities/genre.entity';
@@ -23,6 +23,7 @@ export class ExtractorService {
     private readonly seasonsRepository: Repository<Season>,
     @InjectRepository(Episode)
     private readonly episodesRepository: Repository<Episode>,
+    private readonly entityManager: EntityManager,
   ) {
     this.API_OPTIONS = {
       method: 'GET',
@@ -37,6 +38,8 @@ export class ExtractorService {
   private readonly API_OPTIONS: object;
 
   async getProviders() {
+    const tryQuery = this.checkItsPossibleToQuery();
+    if (!tryQuery) return { message: 'No se puede realizar la consulta' };
     const baseUrl = `${process.env.API_URL}/${constants.WATCH}/${constants.PROVIDERS}/`;
 
     const res = await fetch(
@@ -97,6 +100,8 @@ export class ExtractorService {
   }
 
   async getUpcomingMovies() {
+    const tryQuery = this.checkItsPossibleToQuery();
+    if (!tryQuery) return { message: 'No se puede realizar la consulta' };
     const baseUrl = `${process.env.API_URL}/${constants.MOVIE}/${constants.UPCOMING}`;
 
     const res = await fetch(
@@ -131,6 +136,8 @@ export class ExtractorService {
   }
 
   async getAiringTodaySeries() {
+    const tryQuery = this.checkItsPossibleToQuery();
+    if (!tryQuery) return { message: 'No se puede realizar la consulta' };
     const baseUrl = `${process.env.API_URL}/${constants.DISCOVER}/${constants.TV}`;
     const currentDate = dayjs();
     const prevDate = currentDate.subtract(7, 'd');
@@ -433,5 +440,11 @@ export class ExtractorService {
         return episodesToStored;
       }
     }
+  }
+
+  async checkItsPossibleToQuery() {
+    return Boolean(await this.entityManager.query(
+      "SELECT value_status FROM configuration WHERE name = 'load_news'"
+    ));
   }
 }
