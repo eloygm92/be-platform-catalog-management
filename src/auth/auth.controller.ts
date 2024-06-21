@@ -1,7 +1,6 @@
 import { Controller, Get, UseGuards, Res, Req, HttpStatus, Post, Body, Patch } from "@nestjs/common";
 import { AuthService } from './auth.service';
 import { Response } from 'express'
-import { GoogleOauthGuard } from "./guards/google-oauth.guard";
 import { CreateUserDto } from "../user/dto/create-user.dto";
 import { AuthDto } from "./dto/create-auth.dto";
 import { Request } from 'express';
@@ -60,27 +59,6 @@ export class AuthController {
   @Post('logout')
   logout(@Req() req: Request, @Body() body: { user: { sub: number | string } }) {
     return this.authService.logout(body.user.sub);
-  }
-
-  @Get('google')
-  @UseGuards(GoogleOauthGuard)
-  async auth() {}
-
-  @Get('google/callback')
-  @UseGuards(GoogleOauthGuard)
-  async googleAuthCallback(
-    @Req() req: any,
-    @Res() res: Response,
-  ) {
-    const token = await this.authService.signInGoogle(req.user);
-
-    res.cookie('access_token', token, {
-      maxAge: 2592000000,
-      sameSite: 'strict',
-      secure: true,
-    });
-
-    return res.status(HttpStatus.OK);
   }
 
   @UseGuards(RefreshTokenGuard)

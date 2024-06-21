@@ -1,6 +1,6 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { ExtractJwt } from 'passport-jwt';
-import { JwtPayload } from '../strategies/jwt.strategy';
+import { JwtPayload } from '../strategies/accessToken.strategy';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from '../auth.service';
 

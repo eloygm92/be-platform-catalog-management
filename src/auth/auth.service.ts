@@ -9,7 +9,7 @@ import { CreateUserDto } from "../user/dto/create-user.dto";
 import * as bcrypt from 'bcrypt';
 import * as process from "process";
 import { Role } from "../user/entities/role.entity";
-import { JwtPayload } from "./strategies/jwt.strategy";
+import { JwtPayload } from "./strategies/accessToken.strategy";
 import { sendChangePassword, sendCreatedUser } from "../helpers/sendgrid.helper";
 
 @Injectable()
