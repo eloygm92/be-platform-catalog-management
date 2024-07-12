@@ -34,7 +34,7 @@ export class AppService {
   }
   private API_OPTIONS: object;
 
-  @Cron('* */2 * * * *')
+  //@Cron('* */2 * * * *')
   async taskUpdate() {
     const idsToUpdated = await this.watchableRepository.find({
       select: ['id', 'type'],
@@ -157,7 +157,7 @@ export class AppService {
         "SELECT value_status FROM configuration WHERE name = 'new_tvs'",
       )).value_status,
     );
-    console.log(tryQuery, 'tryQuery');
+
     if (!tryQuery) return { message: 'No se puede realizar la consulta' };
     else {
       let watchablesToFetch: Watchable[] = [];
