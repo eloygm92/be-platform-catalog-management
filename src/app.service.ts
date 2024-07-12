@@ -56,10 +56,11 @@ export class AppService {
   //@Interval(4000)
   async handleTaskMovie(watchableId?: number | undefined) {
     const tryQuery = Boolean(
-      await this.entityManager.query(
+      (await this.entityManager.query(
         "SELECT value_status FROM configuration WHERE name = 'news_movies'",
-      ),
+      )).value_status,
     );
+    console.log(tryQuery, 'tryQuery');
     if (!tryQuery) return { message: 'No se puede realizar la consulta' };
     else {
       let watchablesToFetch: Watchable[] = [];
@@ -152,11 +153,11 @@ export class AppService {
   //@Interval(10000)
   async handleTaskTv(watchableId?: number | undefined) {
     const tryQuery = Boolean(
-      await this.entityManager.query(
+      (await this.entityManager.query(
         "SELECT value_status FROM configuration WHERE name = 'new_tvs'",
-      ),
+      )).value_status,
     );
-
+    console.log(tryQuery, 'tryQuery');
     if (!tryQuery) return { message: 'No se puede realizar la consulta' };
     else {
       let watchablesToFetch: Watchable[] = [];
