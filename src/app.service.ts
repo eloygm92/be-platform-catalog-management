@@ -60,7 +60,7 @@ export class AppService {
         "SELECT value_status FROM configuration WHERE name = 'news_movies'",
       )).value_status,
     );
-    console.log(tryQuery, 'tryQuery');
+
     if (!tryQuery) return { message: 'No se puede realizar la consulta' };
     else {
       let watchablesToFetch: Watchable[] = [];
