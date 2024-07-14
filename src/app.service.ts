@@ -37,28 +37,18 @@ export class AppService {
   @Cron('0 */2 * * * *')
   //@Interval(10000)
   async taskUpdate() {
-    const tryQuery = Boolean(
-      (
-        await this.entityManager.query(
-          "SELECT value_status FROM configuration WHERE name = 'reupdate_all'",
-        )
-      ).value_status,
-    );
-    if (!tryQuery) return { message: 'No se puede realizar la consulta' };
-    else {
-      const idsToUpdated = await this.watchableRepository.find({
-        select: ['id', 'type'],
-        order: { updated_at: 'ASC' },
-        take: 20,
-      });
+    const idsToUpdated = await this.watchableRepository.find({
+      select: ['id', 'type'],
+      order: { updated_at: 'ASC' },
+      take: 20,
+    });
 
-      if (idsToUpdated.length > 0) {
-        for await (const watchable of idsToUpdated) {
-          if (watchable.type === 'tv') {
-            await this.handleTaskTv(watchable.id);
-          } else {
-            await this.handleTaskMovie(watchable.id);
-          }
+    if (idsToUpdated.length > 0) {
+      for await (const watchable of idsToUpdated) {
+        if (watchable.type === 'tv') {
+          await this.handleTaskTv(watchable.id);
+        } else {
+          await this.handleTaskMovie(watchable.id);
         }
       }
     }
