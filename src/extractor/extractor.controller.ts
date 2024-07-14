@@ -18,7 +18,7 @@ export class ExtractorController {
     return this.extractorService.getUpcomingMovies();
   }
 
-  @Cron('0 50 4 * * *')
+  @Cron('0 30 5 * * *')
   @Get('tv/upcoming')
   getUpcomingTv() {
     return this.extractorService.getAiringTodaySeries();

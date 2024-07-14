@@ -34,20 +34,31 @@ export class AppService {
   }
   private API_OPTIONS: object;
 
-  //@Cron('* */2 * * * *')
+  @Cron('0 */2 * * * *')
+  //@Interval(10000)
   async taskUpdate() {
-    const idsToUpdated = await this.watchableRepository.find({
-      select: ['id', 'type'],
-      order: { updated_at: 'ASC' },
-      take: 10,
-    });
+    const tryQuery = Boolean(
+      (
+        await this.entityManager.query(
+          "SELECT value_status FROM configuration WHERE name = 'reupdate_all'",
+        )
+      ).value_status,
+    );
+    if (!tryQuery) return { message: 'No se puede realizar la consulta' };
+    else {
+      const idsToUpdated = await this.watchableRepository.find({
+        select: ['id', 'type'],
+        order: { updated_at: 'ASC' },
+        take: 20,
+      });
 
-    if (idsToUpdated.length > 0) {
-      for await (const watchable of idsToUpdated) {
-        if (watchable.type === 'tv') {
-          await this.handleTaskTv(watchable.id);
-        } else {
-          await this.handleTaskMovie(watchable.id);
+      if (idsToUpdated.length > 0) {
+        for await (const watchable of idsToUpdated) {
+          if (watchable.type === 'tv') {
+            await this.handleTaskTv(watchable.id);
+          } else {
+            await this.handleTaskMovie(watchable.id);
+          }
         }
       }
     }
@@ -56,9 +67,11 @@ export class AppService {
   //@Interval(4000)
   async handleTaskMovie(watchableId?: number | undefined) {
     const tryQuery = Boolean(
-      (await this.entityManager.query(
-        "SELECT value_status FROM configuration WHERE name = 'news_movies'",
-      )).value_status,
+      (
+        await this.entityManager.query(
+          "SELECT value_status FROM configuration WHERE name = 'news_movies'",
+        )
+      ).value_status,
     );
 
     if (!tryQuery) return { message: 'No se puede realizar la consulta' };
@@ -66,19 +79,16 @@ export class AppService {
       let watchablesToFetch: Watchable[] = [];
       if (watchableId) {
         watchablesToFetch = await this.watchableRepository.find({
-          relations: ["provider"],
-
-          //where: { type: 'tv' },
+          relations: ['provider'],
           where: { id: watchableId },
-          order: { updated_at: "ASC" }
-          //take: 20,
+          order: { updated_at: 'ASC' },
         });
       } else {
         watchablesToFetch = await this.watchableRepository.find({
-          relations: ["provider"],
-          where: { type: "movie" },
-          order: { updated_at: "ASC" },
-          take: 20
+          relations: ['provider'],
+          where: { type: 'movie' },
+          order: { updated_at: 'ASC' },
+          take: 20,
         });
       }
 
@@ -88,17 +98,17 @@ export class AppService {
         for await (const watchable of watchablesToFetch) {
           const dataJson: any = await fetch(
             `https://api.themoviedb.org/3/movie/${watchable.external_id}?language=es-ES`,
-            this.API_OPTIONS
+            this.API_OPTIONS,
           ).then((res) => res.json());
           const watchableData: Watchable = Object.assign({}, watchable);
           if (dataJson.status_code === 34) {
             watchableData.popularity = 0;
             watchableData.name = watchable.original_name;
-            watchableData.overview = "";
+            watchableData.overview = '';
           } else {
             const providersData: any = await fetch(
               `https://api.themoviedb.org/3/movie/${watchable.external_id}/watch/providers`,
-              this.API_OPTIONS
+              this.API_OPTIONS,
             )
               .then((res) => res.json())
               .then((dataJson) => dataJson.results);
@@ -109,16 +119,16 @@ export class AppService {
                   (provider: any) =>
                     providers.find(
                       (providerAux) =>
-                        providerAux.external_id === provider.provider_id
-                    )
+                        providerAux.external_id === provider.provider_id,
+                    ),
                 );
               }
               if (providersData?.ES?.ads?.length > 0) {
                 const providesAux = providersData.ES.ads.map((provider: any) =>
                   providers.find(
                     (providerAux) =>
-                      providerAux.external_id === provider.provider_id
-                  )
+                      providerAux.external_id === provider.provider_id,
+                  ),
                 );
                 watchableData.provider =
                   watchable.provider?.length > 0
@@ -129,7 +139,7 @@ export class AppService {
             watchableData.name = dataJson.title;
             watchableData.overview = dataJson.overview;
             watchableData.release_date =
-              dataJson.release_date === "" ? null : dataJson.release_date;
+              dataJson.release_date === '' ? null : dataJson.release_date;
             watchableData.vote_average = dataJson.vote_average;
             watchableData.vote_count = dataJson.vote_count;
             watchableData.poster_path = dataJson.poster_path;
@@ -137,9 +147,9 @@ export class AppService {
             watchableData.tagline = dataJson.tagline;
             dataJson.genres?.length > 0
               ? (watchable.genres = dataJson.genres.map((genre: any) =>
-                genres.find((genreAux) => genreAux.external_id === genre.id)
-              ))
-              : "";
+                  genres.find((genreAux) => genreAux.external_id === genre.id),
+                ))
+              : '';
             watchableData.popularity = dataJson.popularity;
           }
           watchableData.control = !watchable.control;
@@ -150,12 +160,14 @@ export class AppService {
     }
   }
 
-  //@Interval(10000)
+  //@Interval(40000)
   async handleTaskTv(watchableId?: number | undefined) {
     const tryQuery = Boolean(
-      (await this.entityManager.query(
-        "SELECT value_status FROM configuration WHERE name = 'new_tvs'",
-      )).value_status,
+      (
+        await this.entityManager.query(
+          "SELECT value_status FROM configuration WHERE name = 'new_tvs'",
+        )
+      ).value_status,
     );
 
     if (!tryQuery) return { message: 'No se puede realizar la consulta' };
@@ -163,19 +175,17 @@ export class AppService {
       let watchablesToFetch: Watchable[] = [];
       if (watchableId) {
         watchablesToFetch = await this.watchableRepository.find({
-          relations: ["seasons", "provider"],
-          //where: { type: 'tv' },
+          relations: ['seasons', 'provider'],
           where: { id: watchableId },
-          order: { updated_at: "ASC" }
+          order: { updated_at: 'ASC' },
           //take: 20,
         });
       } else {
         watchablesToFetch = await this.watchableRepository.find({
-          relations: ["seasons", "provider"],
-          where: { type: "tv" },
-          //where: { id: 936622 },
-          order: { updated_at: "ASC" },
-          take: 20
+          relations: ['seasons', 'provider'],
+          where: { type: 'tv' },
+          order: { updated_at: 'ASC' },
+          take: 10,
         });
       }
 
@@ -187,17 +197,17 @@ export class AppService {
             const watchableData: Watchable = Object.assign({}, watchable);
             const dataJson: any = await fetch(
               `https://api.themoviedb.org/3/tv/${watchable.external_id}?language=es-ES`,
-              this.API_OPTIONS
+              this.API_OPTIONS,
             ).then((res) => res.json());
 
             if (dataJson.status_code === 34) {
               watchableData.popularity = 0;
               watchableData.name = watchable.original_name;
-              watchableData.overview = "";
+              watchableData.overview = '';
             } else {
               const providersData: any = await fetch(
                 `https://api.themoviedb.org/3/tv/${watchable.external_id}/watch/providers`,
-                this.API_OPTIONS
+                this.API_OPTIONS,
               )
                 .then((res) => res.json())
                 .then((dataJson) => dataJson.results);
@@ -208,16 +218,17 @@ export class AppService {
                     (provider: any) =>
                       providers.find(
                         (providerAux) =>
-                          providerAux.external_id === provider.provider_id
-                      )
+                          providerAux.external_id === provider.provider_id,
+                      ),
                   );
                 }
                 if (providersData?.ES?.ads?.length > 0) {
-                  const providesAux = providersData.ES.ads.map((provider: any) =>
-                    providers.find(
-                      (providerAux) =>
-                        providerAux.external_id === provider.provider_id
-                    )
+                  const providesAux = providersData.ES.ads.map(
+                    (provider: any) =>
+                      providers.find(
+                        (providerAux) =>
+                          providerAux.external_id === provider.provider_id,
+                      ),
                   );
                   watchableData.provider =
                     watchable.provider?.length > 0
@@ -228,7 +239,7 @@ export class AppService {
               watchableData.name = dataJson.name;
               watchableData.overview = dataJson.overview;
               watchableData.release_date =
-                dataJson.first_air_date === "" ? null : dataJson.first_air_date;
+                dataJson.first_air_date === '' ? null : dataJson.first_air_date;
               watchableData.vote_average = dataJson.vote_average;
               watchableData.vote_count = dataJson.vote_count;
               watchableData.poster_path = dataJson.poster_path;
@@ -236,14 +247,16 @@ export class AppService {
               watchableData.tagline = dataJson.tagline;
               dataJson.genres?.length > 0
                 ? (watchable.genres = dataJson.genres.map((genre) =>
-                  genres.find((genreAux) => genreAux.external_id === genre.id)
-                ))
-                : "";
+                    genres.find(
+                      (genreAux) => genreAux.external_id === genre.id,
+                    ),
+                  ))
+                : '';
               watchableData.popularity = dataJson.popularity;
 
               watchableData.seasons = await this.getSeasonsAndEpisodesNew(
                 watchable,
-                dataJson
+                dataJson,
               );
             }
             watchableData.control = !watchable.control;
@@ -331,7 +344,10 @@ export class AppService {
             (episodeAux) => episodeAux.external_id === episode.id,
           );
           if (episodeLocate) {
-            episodeLocate.name = episode.name;
+            episodeLocate.name =
+              episode.name.length > 250
+                ? episode.name.slice(0, 247) + '...'
+                : episode.name;
             episodeLocate.overview = episode.overview;
             episodeLocate.air_date =
               episode.air_date === '' ? null : episode.air_date;

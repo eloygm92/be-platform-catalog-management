@@ -40,150 +40,176 @@ export class ExtractorService {
   async getProviders() {
     const tryQuery = await this.checkItsPossibleToQuery();
     if (!tryQuery) return { message: 'No se puede realizar la consulta' };
-    const baseUrl = `${process.env.API_URL}/${constants.WATCH}/${constants.PROVIDERS}/`;
+    else {
+      const baseUrl = `${process.env.API_URL}/${constants.WATCH}/${constants.PROVIDERS}/`;
 
-    const res = await fetch(
-      `${baseUrl}${constants.MOVIE}?language=${process.env.API_LANG}&watch_region=ES`,
-      this.API_OPTIONS,
-    );
+      const res = await fetch(
+        `${baseUrl}${constants.MOVIE}?language=${process.env.API_LANG}&watch_region=ES`,
+        this.API_OPTIONS
+      );
 
-    const providersStored = await this.providerRepository.find();
-    if (res.ok) {
-      const jsonProvidersMovie: { results: {display_priorities: object, display_priority: object, logo_path: string, provider_name: string, provider_id: number}[] } = await res.json();
+      const providersStored = await this.providerRepository.find();
+      if (res.ok) {
+        const jsonProvidersMovie: {
+          results: {
+            display_priorities: object,
+            display_priority: object,
+            logo_path: string,
+            provider_name: string,
+            provider_id: number
+          }[]
+        } = await res.json();
 
-      for await (const providerMovie of jsonProvidersMovie.results) {
-        const foundProvider = providersStored.find(
-          (provider) => provider.external_id === providerMovie.provider_id,
-        );
+        for await (const providerMovie of jsonProvidersMovie.results) {
+          const foundProvider = providersStored.find(
+            (provider) => provider.external_id === providerMovie.provider_id
+          );
 
-        if (foundProvider) {
-          foundProvider.name = providerMovie.provider_name;
-          foundProvider.logo_path = providerMovie.logo_path;
-        } else {
-          const newProvider = new Provider();
-          newProvider.name = providerMovie.provider_name;
-          newProvider.logo_path = providerMovie.logo_path;
-          newProvider.external_id = providerMovie.provider_id;
-          providersStored.push(this.providerRepository.create(newProvider));
+          if (foundProvider) {
+            foundProvider.name = providerMovie.provider_name;
+            foundProvider.logo_path = providerMovie.logo_path;
+          } else {
+            const newProvider = new Provider();
+            newProvider.name = providerMovie.provider_name;
+            newProvider.logo_path = providerMovie.logo_path;
+            newProvider.external_id = providerMovie.provider_id;
+            providersStored.push(this.providerRepository.create(newProvider));
+          }
         }
+        await this.providerRepository.save(providersStored);
       }
-      await this.providerRepository.save(providersStored);
-    }
 
-    const res2 = await fetch(
-      `${baseUrl}${constants.TV}?language=${process.env.API_LANG}&watch_region=ES`,
-      this.API_OPTIONS,
-    );
+      const res2 = await fetch(
+        `${baseUrl}${constants.TV}?language=${process.env.API_LANG}&watch_region=ES`,
+        this.API_OPTIONS
+      );
 
-    if (res2.ok) {
-      const jsonProvidersTv: { results: {display_priorities: object, display_priority: object, logo_path: string, provider_name: string, provider_id: number}[] } = await res2.json();
-      for await (const providerTv of jsonProvidersTv.results) {
-        const foundProvider = providersStored.find(
-          (provider) => provider.external_id === providerTv.provider_id,
-        );
+      if (res2.ok) {
+        const jsonProvidersTv: {
+          results: {
+            display_priorities: object,
+            display_priority: object,
+            logo_path: string,
+            provider_name: string,
+            provider_id: number
+          }[]
+        } = await res2.json();
+        for await (const providerTv of jsonProvidersTv.results) {
+          const foundProvider = providersStored.find(
+            (provider) => provider.external_id === providerTv.provider_id
+          );
 
-        if (foundProvider) {
-          foundProvider.name = providerTv.provider_name;
-          foundProvider.logo_path = providerTv.logo_path;
-        } else {
-          const newProvider = new Provider();
-          newProvider.name = providerTv.provider_name;
-          newProvider.logo_path = providerTv.logo_path;
-          newProvider.external_id = providerTv.provider_id;
-          providersStored.push(this.providerRepository.create(newProvider));
+          if (foundProvider) {
+            foundProvider.name = providerTv.provider_name;
+            foundProvider.logo_path = providerTv.logo_path;
+          } else {
+            const newProvider = new Provider();
+            newProvider.name = providerTv.provider_name;
+            newProvider.logo_path = providerTv.logo_path;
+            newProvider.external_id = providerTv.provider_id;
+            providersStored.push(this.providerRepository.create(newProvider));
+          }
         }
+        await this.providerRepository.save(providersStored);
       }
-      await this.providerRepository.save(providersStored);
-    }
 
-    return { msg: constants.FINISHED + ' ' + constants.PROVIDERS };
+      return { msg: constants.FINISHED + " " + constants.PROVIDERS };
+    }
   }
 
   async getUpcomingMovies() {
     const tryQuery = await this.checkItsPossibleToQuery();
     if (!tryQuery) return { message: 'No se puede realizar la consulta' };
-    const baseUrl = `${process.env.API_URL}/${constants.MOVIE}/${constants.UPCOMING}`;
+    else {
+      await this.blockQuery(false, "new_tvs");
+      const baseUrl = `${process.env.API_URL}/${constants.MOVIE}/${constants.UPCOMING}`;
 
-    const res = await fetch(
-      `${baseUrl}?language=${process.env.API_LANG}&page=1`,
-      this.API_OPTIONS,
-    );
-    if (res.ok) {
-      const jsonData = await res.json();
-      const genresSaved = await this.genreRepository.find();
-      const providersSaved = await this.providerRepository.find();
-      await this.mapperUpcomingMovies(
-        jsonData.results,
-        genresSaved,
-        providersSaved,
+      const res = await fetch(
+        `${baseUrl}?language=${process.env.API_LANG}&page=1`,
+        this.API_OPTIONS
       );
-      const totalPages = jsonData.total_pages ?? 1;
-      for (let i = 2; i <= totalPages; i++) {
-        const res2 = await fetch(
-          `${baseUrl}?language=${process.env.API_LANG}&page=${i}`,
-          this.API_OPTIONS,
+      if (res.ok) {
+        const jsonData = await res.json();
+        const genresSaved = await this.genreRepository.find();
+        const providersSaved = await this.providerRepository.find();
+        await this.mapperUpcomingMovies(
+          jsonData.results,
+          genresSaved,
+          providersSaved
         );
-        if (res2.ok) {
-          const jsonData2 = await res2.json();
-          await this.mapperUpcomingMovies(
-            jsonData2.results,
-            genresSaved,
-            providersSaved,
+        const totalPages = jsonData.total_pages ?? 1;
+        for (let i = 2; i <= totalPages; i++) {
+          const res2 = await fetch(
+            `${baseUrl}?language=${process.env.API_LANG}&page=${i}`,
+            this.API_OPTIONS
           );
+          if (res2.ok) {
+            const jsonData2 = await res2.json();
+            await this.mapperUpcomingMovies(
+              jsonData2.results,
+              genresSaved,
+              providersSaved
+            );
+          }
         }
+        await this.blockQuery(true, "new_tvs");
       }
     }
   }
 
   async getAiringTodaySeries() {
     const tryQuery = Boolean(
-      await this.entityManager.query(
+      (await this.entityManager.query(
         "SELECT value_status FROM configuration WHERE name = 'load_news'",
-      ),
+      )).value_status,
     );
     if (!tryQuery) return { message: 'No se puede realizar la consulta' };
-    const baseUrl = `${process.env.API_URL}/${constants.DISCOVER}/${constants.TV}`;
-    const currentDate = dayjs();
-    const prevDate = currentDate.subtract(7, 'd');
-    const futDate = currentDate.add(1, 'M');
+    else {
+      await this.blockQuery(false, "new_movies");
+      const baseUrl = `${process.env.API_URL}/${constants.DISCOVER}/${constants.TV}`;
+      const currentDate = dayjs();
+      const prevDate = currentDate.subtract(7, "d");
+      const futDate = currentDate.add(3, "w");
 
-    const res = await fetch(
-      `${baseUrl}?air_date.gte=${prevDate.format(
-        'YYYY-MM-DD',
-      )}&air_date.lte=${futDate.format(
-        'YYYY-MM-DD',
-      )}&include_adult=false&include_null_first_air_dates=false&language=es-ES&page=1&sort_by=popularity.desc`,
-      this.API_OPTIONS,
-    );
-    if (res.ok) {
-      const jsonData = await res.json();
-
-      const genresSaved = await this.genreRepository.find();
-      const providersSaved = await this.providerRepository.find();
-      await this.mapperAiringTodaySeries(
-        jsonData.results,
-        genresSaved,
-        providersSaved,
+      const res = await fetch(
+        `${baseUrl}?air_date.gte=${prevDate.format(
+          "YYYY-MM-DD"
+        )}&air_date.lte=${futDate.format(
+          "YYYY-MM-DD"
+        )}&include_adult=false&include_null_first_air_dates=false&language=es-ES&page=1&sort_by=popularity.desc`,
+        this.API_OPTIONS
       );
-      const totalPages = jsonData.total_pages ?? 1;
+      if (res.ok) {
+        const jsonData = await res.json();
 
-      for (let i = 2; i <= totalPages; i++) {
-        const nextPage = await fetch(
-          `${baseUrl}?air_date.gte=${prevDate.format(
-            'YYYY-MM-DD',
-          )}&air_date.lte=${futDate.format(
-            'YYYY-MM-DD',
-          )}&include_adult=false&include_null_first_air_dates=false&language=es-ES&page=${i}&sort_by=popularity.desc`,
-          this.API_OPTIONS,
+        const genresSaved = await this.genreRepository.find();
+        const providersSaved = await this.providerRepository.find();
+        await this.mapperAiringTodaySeries(
+          jsonData.results,
+          genresSaved,
+          providersSaved
         );
-        if (nextPage.ok) {
-          const jsonData2 = await nextPage.json();
-          await this.mapperAiringTodaySeries(
-            jsonData2.results,
-            genresSaved,
-            providersSaved,
+        const totalPages = jsonData.total_pages ?? 1;
+
+        for (let i = 2; i <= totalPages; i++) {
+          const nextPage = await fetch(
+            `${baseUrl}?air_date.gte=${prevDate.format(
+              "YYYY-MM-DD"
+            )}&air_date.lte=${futDate.format(
+              "YYYY-MM-DD"
+            )}&include_adult=false&include_null_first_air_dates=false&language=es-ES&page=${i}&sort_by=popularity.desc`,
+            this.API_OPTIONS
           );
+          if (nextPage.ok) {
+            const jsonData2 = await nextPage.json();
+            await this.mapperAiringTodaySeries(
+              jsonData2.results,
+              genresSaved,
+              providersSaved
+            );
+          }
         }
+        await this.blockQuery(true, "new_movies");
       }
     }
   }
@@ -242,6 +268,7 @@ export class ExtractorService {
         }
 
         watchable.name = watchableData.title;
+        watchable.type = constants.MOVIE;
         watchable.original_name = watchableData.original_title;
         watchable.external_id = jsonMovie.id;
         watchable.overview = jsonMovie.overview;
@@ -317,6 +344,7 @@ export class ExtractorService {
 
         watchable.name = watchableData.name;
         watchable.original_name = watchableData.original_name;
+        watchable.type = constants.TV;
         watchable.external_id = jsonSerie.id;
         watchable.overview = watchableData.overview;
         watchable.release_date = watchableData.first_air_date;
@@ -448,9 +476,15 @@ export class ExtractorService {
 
   async checkItsPossibleToQuery() {
     return Boolean(
-      await this.entityManager.query(
+      (await this.entityManager.query(
         "SELECT value_status FROM configuration WHERE name = 'load_news'",
-      ),
+      )).value_status,
+    );
+  }
+
+  async blockQuery(status: boolean, field: string) {
+    await this.entityManager.query(
+      `UPDATE configuration SET value_status = ${status ? 1 : 0} WHERE name = '${field}'`,
     );
   }
 }

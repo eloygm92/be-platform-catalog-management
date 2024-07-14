@@ -46,7 +46,7 @@ import { Role } from './user/entities/role.entity';
       synchronize: false,
       logging: true,
       retryAttempts: 30,
-      poolSize: 30,
+      poolSize: 40,
     }),
     TypeOrmModule.forFeature([
       User,
