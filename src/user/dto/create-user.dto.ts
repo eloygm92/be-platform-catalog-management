@@ -3,6 +3,9 @@ import { Role } from '../entities/role.entity';
 import { Provider } from '../../provider/entities/provider.entity';
 
 export class CreateUserDto {
+  @IsOptional()
+  id: number;
+
   @IsString()
   username: string;
 

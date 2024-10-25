@@ -34,7 +34,7 @@ export class AppService {
   }
   private API_OPTIONS: object;
 
-  @Cron('0 */2 * * * *')
+  //@Cron('0 */2 * * * *')
   //@Interval(10000)
   async taskUpdate() {
     const idsToUpdated = await this.watchableRepository.find({
